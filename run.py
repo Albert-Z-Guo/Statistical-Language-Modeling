@@ -8,7 +8,7 @@ from nltk.corpus import brown
 
 import numpy as np
 import tensorflow as tf
-from tqdm import tqdm_notebook
+from tqdm import tqdm
 
 words = brown.words()
 sents = brown.sents()
@@ -138,6 +138,8 @@ with graph.as_default(), tf.device('/device:GPU:0'):
     # create a saver
     saver = tf.train.Saver()
 
+print('graph built')
+
 # create the directory for TensorBoard variables if there is not
 log_dir = 'log'
 if not os.path.exists(log_dir):
@@ -156,7 +158,7 @@ with tf.Session(graph=graph) as session:
     perplexity_exponent = 0
 
     for epoch in np.arange(num_epochs):
-        for step in tqdm_notebook(np.arange(num_steps)):
+        for step in tqdm(np.arange(num_steps)):
             data_training, label = next(training_data)
             learning_rate = epsilon_0
 
