@@ -84,13 +84,13 @@ t = V*(n-1)*m + V*h + h*(n-1)*m + h + V + m*(n-1)
 r = 10**(-8) # decrease factor
 
 # num_epochs = 1
-num_epochs = 15
+num_epochs = 10
 
 weight_decay = 10**(-4)
 
 # model: y = b + Wx + Utanh(d + Hx)
 graph = tf.Graph()
-with graph.as_default(), tf.device('/device:GPU:0'):
+with graph.as_default():
     with tf.name_scope('inputs'):
         words = tf.placeholder(tf.int32, shape=[n-1])
         y = tf.placeholder(tf.int32, shape=[V])
