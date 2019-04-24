@@ -9,6 +9,23 @@ import numpy as np
 import tensorflow as tf
 from tqdm import tqdm_notebook
 from tqdm import tqdm
+import nltk
+nltk.download('brown') # reference: http://www.nltk.org/nltk_data/
+from nltk.corpus import brown
+
+
+words = brown.words()
+sents = brown.sents()
+sents_mapped, vocab, vocab_reversed = map_words_sents(words, sents)
+
+print('sentence num:', len(sents))
+print('words num:', len(words))
+print('vocab size:', len(vocab))
+
+# reduce memory
+del words
+del sents
+
 
 def map_words_sents(words, sents):
     # select vocabulary, all punctuations included
@@ -62,21 +79,7 @@ try:
     with open('labels.pickle', 'rb') as file:
         labels = pickle.load(file)
 except:
-    import nltk
-    nltk.download('brown') # reference: http://www.nltk.org/nltk_data/
-    from nltk.corpus import brown
 
-    words = brown.words()
-    sents = brown.sents()
-    sents_mapped, vocab, vocab_reversed = map_words_sents(words, sents)
-
-    print('sentence num:', len(sents))
-    print('words num:', len(words))
-    print('vocab size:', len(vocab))
-
-    # reduce memory
-    del words
-    del sents
 
     # check variable sizes
     print('sents_mapped size: {:.3} MB'.format(sys.getsizeof(sents_mapped) / 1024**2))
