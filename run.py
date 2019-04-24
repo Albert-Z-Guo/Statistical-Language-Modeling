@@ -5,26 +5,11 @@ import time
 import pickle
 import collections
 
-import numpy as np
+import nltk
+nltk.download('brown') # reference: http://www.nltk.org/nltk_data/import numpy as np
 import tensorflow as tf
 from tqdm import tqdm_notebook
 from tqdm import tqdm
-import nltk
-nltk.download('brown') # reference: http://www.nltk.org/nltk_data/
-from nltk.corpus import brown
-
-
-words = brown.words()
-sents = brown.sents()
-sents_mapped, vocab, vocab_reversed = map_words_sents(words, sents)
-
-print('sentence num:', len(sents))
-print('words num:', len(words))
-print('vocab size:', len(vocab))
-
-# reduce memory
-del words
-del sents
 
 
 def map_words_sents(words, sents):
@@ -44,6 +29,20 @@ def map_words_sents(words, sents):
     for sent in sents:
         sents_mapped.append([vocab.get(word, 0) for word in sent])
     return np.array(sents_mapped), vocab, vocab_reversed
+
+
+# downlaod corpus
+words = nltk.corpus.brown.words()
+sents = nltk.corpus.brown.sents()
+sents_mapped, vocab, vocab_reversed = map_words_sents(words, sents)
+
+print('sentence num:', len(sents))
+print('words num:', len(words))
+print('vocab size:', len(vocab))
+
+# reduce memory
+del words
+del sents
 
 
 n = 5 # order of the model
