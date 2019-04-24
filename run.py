@@ -210,8 +210,6 @@ with graph.as_default(), tf.device('/cpu:0'):
     # merge all summaries
     summary_merged = tf.summary.merge_all()
 
-
-%%time
 # create the directory for TensorBoard variables if there is not
 log_dir = 'log'
 if not os.path.exists(log_dir):
