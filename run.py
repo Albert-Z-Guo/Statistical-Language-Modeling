@@ -6,7 +6,8 @@ import pickle
 import collections
 
 import nltk
-nltk.download('brown') # reference: http://www.nltk.org/nltk_data/import numpy as np
+nltk.download('brown') # reference: http://www.nltk.org/nltk_data/
+import numpy as np
 import tensorflow as tf
 from tqdm import tqdm_notebook
 from tqdm import tqdm
