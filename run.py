@@ -283,3 +283,8 @@ with tf.Session(graph=graph) as session:
     # save the model
     saver.save(session, os.path.join(log_dir, 'model.ckpt'))
     writer.close()
+
+# record results
+file = open('result.txt', 'w')
+file.write('final perplexity: ' + str(np.exp(-perplexity_exponent/total_steps)))
+file.close()
