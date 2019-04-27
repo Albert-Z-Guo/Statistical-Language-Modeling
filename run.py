@@ -214,7 +214,7 @@ with graph.as_default():
     tf.summary.scalar('MLP9_loss', MLP9_loss)
 
     with tf.name_scope('optimizers'):
-        Custom_Optimizer = tf.contrib.opt.extend_with_decoupled_weight_decay(tf.train.GradientDescentOptimizer)
+        Custom_Optimizer = tf.contrib.opt.extend_with_decoupled_weight_decay(tf.train.AdamOptimizer)
         MLP1_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP1_loss)
         MLP5_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP5_loss)
         MLP7_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP7_loss)
@@ -239,7 +239,7 @@ r = 10**(-8) # decrease factor
 t = V*(n-1)*m + V*h + h*(n-1)*m + h + V + m*(n-1)
 weight_decay = 10**(-4)
 
-num_epochs = 10
+num_epochs = 20
 num_steps = training_steps
 # num_steps = 10000
 parameter_updates = 0
