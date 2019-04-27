@@ -108,6 +108,8 @@ except:
     del sents_mapped
 
 
+batch_size = 64
+
 def generator(data, labels, vocab_size, training=True):
     if training:
         i = 0
@@ -140,8 +142,6 @@ training_data = generator(data, labels, len(vocab), training=True)
 
 # the following graph contains MLP 1, MLP 5, MLP 7, and MLP 9 loss optimizations
 # MLP 1 model: y = b + Wx + Utanh(d + Hx) where MLP 1 is d + Hx
-
-batch_size = 128
 h = 50
 V = len(vocab) # vocabulary size
 m = 60 # embedding size
