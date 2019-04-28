@@ -230,7 +230,8 @@ log_dir = 'log'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-h = 50
+# h = 50
+h = 100
 V = len(vocab) # vocabulary size
 # m = 60 # embedding size
 m = 30 # embedding size
@@ -276,13 +277,13 @@ with tf.Session(graph=graph) as session:
             #                                                 feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
             #                                                 run_metadata=run_metadata)
 
-            _, loss_step, prob_step, summary = session.run([MLP7_optimizer, MLP7_loss, MLP7_prob, summary_merged],
+            # _, loss_step, prob_step, summary = session.run([MLP7_optimizer, MLP7_loss, MLP7_prob, summary_merged],
+            #                                                 feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
+            #                                                 run_metadata=run_metadata)
+
+            _, loss_step, prob_step, summary = session.run([MLP9_optimizer, MLP9_loss, MLP9_prob, summary_merged],
                                                             feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
                                                             run_metadata=run_metadata)
-
-#             _, loss_step, prob_step, summary = session.run([MLP9_optimizer, MLP9_loss, MLP9_prob, summary_merged],
-#                                                             feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
-#                                                             run_metadata=run_metadata)
 
             total_steps += 1
             learning_rate = epsilon_0/(1+r*t)
@@ -300,10 +301,10 @@ with tf.Session(graph=graph) as session:
                 print('perplexity at step', total_steps, ':', np.exp(-perplexity_exponent/total_steps))
 
     # save the model
-    saver.save(session, os.path.join(log_dir, 'MLP7.ckpt'))
+    saver.save(session, os.path.join(log_dir, 'MLP9.ckpt'))
     writer.close()
 
 # record results
-file = open('MLP7_results.txt', 'w')
+file = open('MLP9_results.txt', 'w')
 file.write('final perplexity: ' + str(np.exp(-perplexity_exponent/total_steps)))
 file.close()
