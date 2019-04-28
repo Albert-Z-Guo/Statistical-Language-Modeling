@@ -260,18 +260,18 @@ with tf.Session(graph=graph) as session:
     total_steps = 0
 
     for epoch in np.arange(num_epochs):
-        print('epoch:', epoch)
+        print('epoch:', epoch + 1)
         for step in tqdm_notebook(np.arange(num_steps)):
             data_training, label = next(training_data)
 
             # collect runtime statistics
             run_metadata = tf.RunMetadata()
 
-#             _, loss_step, prob_step, summary = session.run([model.MLP1_optimizer, model.MLP1_loss, model.MLP1_prob, model.summary_merged],
-#                                                             feed_dict={model.words:data_training, model.y:label, model.epsilon_t:learning_rate},
-#                                                             run_metadata=run_metadata)
-
             _, loss_step, prob_step, summary = session.run([MLP1_optimizer, MLP1_loss, MLP1_prob, summary_merged],
+                                                            feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
+                                                            run_metadata=run_metadata)
+
+            _, loss_step, prob_step, summary = session.run([MLP5_optimizer, MLP5_loss, MLP5_prob, summary_merged],
                                                             feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
                                                             run_metadata=run_metadata)
 
@@ -295,10 +295,10 @@ with tf.Session(graph=graph) as session:
                 print('perplexity at step', total_steps, ':', np.exp(-perplexity_exponent/total_steps))
 
     # save the model
-    saver.save(session, os.path.join(log_dir, 'MLP1.ckpt'))
+    saver.save(session, os.path.join(log_dir, 'MLP5.ckpt'))
     writer.close()
 
 # record results
-file = open('MLP1_results.txt', 'w')
+file = open('MLP5_results.txt', 'w')
 file.write('final perplexity: ' + str(np.exp(-perplexity_exponent/total_steps)))
 file.close()
