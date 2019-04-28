@@ -226,7 +226,7 @@ weight_decay = 10**(-4)
 
 
 MLP3_graph = tf.Graph()
-with MLP3_graph.as_default():
+with MLP3_graph.as_default(), tf.device('/cpu:0'):
     with tf.name_scope('inputs'):
         words = tf.placeholder(tf.int32, shape=[batch_size, n-1])
         y = tf.placeholder(tf.int32, shape=[batch_size, V])
