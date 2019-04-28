@@ -219,7 +219,50 @@ with graph.as_default():
         MLP5_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP5_loss)
         MLP7_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP7_loss)
         MLP9_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP9_loss)
-    #         optimizer = tf.train.GradientDescentOptimizer(learning_rate=epsilon_t).minimize(loss)
+    #         optimizer = tf.train.AdamOptimizer(learning_rate=epsilon_t).minimize(loss) # without weight decay
+
+    # merge all summaries
+    summary_merged = tf.summary.merge_all()
+
+
+MLP3_graph = tf.Graph()
+with MLP3_graph.as_default():
+    with tf.name_scope('inputs'):
+        words = tf.placeholder(tf.int32, shape=[batch_size, n-1])
+        y = tf.placeholder(tf.int32, shape=[batch_size, V])
+        epsilon_t = tf.placeholder(tf.float64, shape=None)
+
+    with tf.name_scope('parameters'):
+        C = tf.Variable(tf.random_uniform([V, m], -1.0, 1.0))
+        x = tf.transpose(tf.reshape(tf.nn.embedding_lookup(C, words), [-1, (n-1)*m])) # [(n-1)*m, batch_size]
+        W = tf.Variable(tf.truncated_normal([V, (n-1)*m], stddev=1.0/np.sqrt((n-1)*m)))
+        M1 = tf.Variable(tf.truncated_normal([V, V], stddev=1.0/np.sqrt(V)))
+        M2 = tf.Variable(tf.truncated_normal([V, V], stddev=1.0/np.sqrt(V)))
+        b1 = tf.Variable(tf.zeros([V, batch_size]))
+        b2 = tf.Variable(tf.zeros([V, batch_size]))
+        b3 = tf.Variable(tf.zeros([V, batch_size]))
+
+    with tf.name_scope('direct_connections'):
+        Wx = tf.matmul(W, x)
+
+    with tf.name_scope('MLPs'):
+        MLP1 = b1 + tf.matmul(W, x)
+        MLP2 = b2 + tf.matmul(M1, MLP1)
+        MLP3 = tf.matmul(M2, MLP2)
+
+    with tf.name_scope('MLP_logits'):
+        MLP3_logits = b3 + Wx + MLP3
+
+    MLP3_prob = tf.nn.softmax(logits=MLP3_logits, axis=0)
+
+    with tf.name_scope('MLP_losses'):
+        MLP3_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y, logits=tf.transpose(MLP3_logits)))
+
+    tf.summary.scalar('MLP3_loss', MLP3_loss)
+
+    with tf.name_scope('optimizers'):
+        Custom_Optimizer = tf.contrib.opt.extend_with_decoupled_weight_decay(tf.train.AdamOptimizer)
+        MLP3_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP3_loss)
 
     # merge all summaries
     summary_merged = tf.summary.merge_all()
@@ -243,13 +286,10 @@ weight_decay = 10**(-4)
 
 num_epochs = 20
 num_steps = training_steps
-# num_steps = 10000
 parameter_updates = 0
 
-# model = Model(num_hidden_units=h, vocab_size=V, embedding_size=60, weight_decay=10**(-4))
-
 # with tf.Session(graph=model.graph) as session:
-with tf.Session(graph=graph) as session:
+with tf.Session(graph=MLP3_graph) as session:
     saver = tf.train.Saver()
     writer = tf.summary.FileWriter(log_dir, session.graph)
 
@@ -281,7 +321,11 @@ with tf.Session(graph=graph) as session:
             #                                                 feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
             #                                                 run_metadata=run_metadata)
 
-            _, loss_step, prob_step, summary = session.run([MLP9_optimizer, MLP9_loss, MLP9_prob, summary_merged],
+            # _, loss_step, prob_step, summary = session.run([MLP9_optimizer, MLP9_loss, MLP9_prob, summary_merged],
+            #                                                 feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
+            #                                                 run_metadata=run_metadata)
+
+            _, loss_step, prob_step, summary = session.run([MLP3_optimizer, MLP3_loss, MLP3_prob, summary_merged],
                                                             feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
                                                             run_metadata=run_metadata)
 
@@ -301,10 +345,10 @@ with tf.Session(graph=graph) as session:
                 print('perplexity at step', total_steps, ':', np.exp(-perplexity_exponent/total_steps))
 
     # save the model
-    saver.save(session, os.path.join(log_dir, 'MLP9.ckpt'))
+    saver.save(session, os.path.join(log_dir, 'MLP3.ckpt'))
     writer.close()
 
 # record results
-file = open('MLP9_results.txt', 'w')
+file = open('MLP3_results.txt', 'w')
 file.write('final perplexity: ' + str(np.exp(-perplexity_exponent/total_steps)))
 file.close()
