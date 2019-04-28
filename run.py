@@ -226,7 +226,7 @@ weight_decay = 10**(-4)
 
 
 MLP3_graph = tf.Graph()
-with MLP3_graph.as_default(), tf.device('/cpu:0'):
+with MLP3_graph.as_default():
     with tf.name_scope('inputs'):
         words = tf.placeholder(tf.int32, shape=[batch_size, n-1])
         y = tf.placeholder(tf.int32, shape=[batch_size, V])
@@ -261,9 +261,9 @@ with MLP3_graph.as_default(), tf.device('/cpu:0'):
     tf.summary.scalar('MLP3_loss', MLP3_loss)
 
     with tf.name_scope('optimizers'):
-        # Custom_Optimizer = tf.contrib.opt.extend_with_decoupled_weight_decay(tf.train.AdamOptimizer)
-        # MLP3_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP3_loss)
-        MLP3_optimizer = tf.train.AdamOptimizer(learning_rate=epsilon_t).minimize(MLP3_loss) # without weight decay
+        Custom_Optimizer = tf.contrib.opt.extend_with_decoupled_weight_decay(tf.train.AdamOptimizer)
+        MLP3_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP3_loss)
+        # MLP3_optimizer = tf.train.AdamOptimizer(learning_rate=epsilon_t).minimize(MLP3_loss) # without weight decay
 
     # merge all summaries
     summary_merged = tf.summary.merge_all()
@@ -299,7 +299,7 @@ with tf.Session(graph=MLP3_graph) as session:
 
     for epoch in np.arange(num_epochs):
         print('epoch:', epoch + 1)
-        for step in tqdm_notebook(np.arange(num_steps)):
+        for step in tqdm(np.arange(num_steps)):
             data_training, label = next(training_data)
 
             # collect runtime statistics
