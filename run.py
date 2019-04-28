@@ -261,8 +261,9 @@ with MLP3_graph.as_default(), tf.device('/cpu:0'):
     tf.summary.scalar('MLP3_loss', MLP3_loss)
 
     with tf.name_scope('optimizers'):
-        Custom_Optimizer = tf.contrib.opt.extend_with_decoupled_weight_decay(tf.train.AdamOptimizer)
-        MLP3_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP3_loss)
+        # Custom_Optimizer = tf.contrib.opt.extend_with_decoupled_weight_decay(tf.train.AdamOptimizer)
+        # MLP3_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP3_loss)
+        MLP3_optimizer = tf.train.AdamOptimizer(learning_rate=epsilon_t).minimize(MLP3_loss) # without weight decay
 
     # merge all summaries
     summary_merged = tf.summary.merge_all()
