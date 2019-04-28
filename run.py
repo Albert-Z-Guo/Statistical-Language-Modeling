@@ -273,16 +273,13 @@ log_dir = 'log'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-# h = 50
-h = 100
+h = 0
 V = len(vocab) # vocabulary size
-# m = 60 # embedding size
-m = 30 # embedding size
+m = 60 # embedding size
 epsilon_0 = 10**(-3)
 r = 10**(-8) # decrease factor
 # total number of parameters updates (from W, U, H, d, b, and words vectors from C) per training step
-# t = V*(n-1)*m + V*h + h*(n-1)*m + h + V + m*(n-1)
-t = V*(n-1)*m + V + m*(n-1)
+t = V*(n-1)*m + V*h + h*(n-1)*m + h + V + m*(n-1)
 weight_decay = 10**(-4)
 
 num_epochs = 20
