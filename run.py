@@ -232,7 +232,8 @@ if not os.path.exists(log_dir):
 
 h = 50
 V = len(vocab) # vocabulary size
-m = 60 # embedding size
+# m = 60 # embedding size
+m = 30 # embedding size
 epsilon_0 = 10**(-3)
 r = 10**(-8) # decrease factor
 # total number of parameters updates (from W, U, H, d, b, and words vectors from C) per training step
@@ -267,11 +268,15 @@ with tf.Session(graph=graph) as session:
             # collect runtime statistics
             run_metadata = tf.RunMetadata()
 
-            _, loss_step, prob_step, summary = session.run([MLP1_optimizer, MLP1_loss, MLP1_prob, summary_merged],
-                                                            feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
-                                                            run_metadata=run_metadata)
+            # _, loss_step, prob_step, summary = session.run([MLP1_optimizer, MLP1_loss, MLP1_prob, summary_merged],
+            #                                                 feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
+            #                                                 run_metadata=run_metadata)
+            #
+            # _, loss_step, prob_step, summary = session.run([MLP5_optimizer, MLP5_loss, MLP5_prob, summary_merged],
+            #                                                 feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
+            #                                                 run_metadata=run_metadata)
 
-            _, loss_step, prob_step, summary = session.run([MLP5_optimizer, MLP5_loss, MLP5_prob, summary_merged],
+            _, loss_step, prob_step, summary = session.run([MLP7_optimizer, MLP7_loss, MLP7_prob, summary_merged],
                                                             feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
                                                             run_metadata=run_metadata)
 
@@ -295,10 +300,10 @@ with tf.Session(graph=graph) as session:
                 print('perplexity at step', total_steps, ':', np.exp(-perplexity_exponent/total_steps))
 
     # save the model
-    saver.save(session, os.path.join(log_dir, 'MLP5.ckpt'))
+    saver.save(session, os.path.join(log_dir, 'MLP7.ckpt'))
     writer.close()
 
 # record results
-file = open('MLP5_results.txt', 'w')
+file = open('MLP7_results.txt', 'w')
 file.write('final perplexity: ' + str(np.exp(-perplexity_exponent/total_steps)))
 file.close()
