@@ -370,8 +370,8 @@ with tf.Session(graph=model.graph) as session:
     t = model.V*(n-1)*model.m +  model.V*model.h + model.h*(n-1)*model.m + model.h + model.V + model.m*(n-1)
 
     learning_rate = epsilon_0
-    total_batches = 0
-    total_loss = 0
+    batches_total = 0
+    loss_total = 0
     perplexity_exponent = 0
     perplexity_exponent_total = 0
 
@@ -387,25 +387,26 @@ with tf.Session(graph=model.graph) as session:
 
             # update learning rate
             learning_rate = epsilon_0/(1+r*t)
-            t += t
+            t += t/1000
 
-            total_batches += 1
-            total_loss += loss_batch
+            batches_total += 1
+            loss_total += loss_batch
 
             prob_batch = prob_batch.T # [batch_size, vocab_size]
             perplexity_exponent = np.sum(prob_batch[np.arange(len(prob_batch)), np.argmax(label, axis=1)])
             perplexity_exponent_total += perplexity_exponent
 
             # record summaries
-            writer.add_summary(summary, total_batches)
+            writer.add_summary(summary, batches_total)
             if batch == (num_batches - 1):
                 writer.add_run_metadata(run_metadata, 'epoch{} batch {}'.format(epoch, batch))
 
             if batch % 100 == 0 and batch > 0:
-                print('loss at batch', total_batches, ':', loss_batch)
-                print('average loss per word so far:', total_loss/total_batches/batch_size)
-                print('perplexity at batch', total_batches, ':', np.exp(-perplexity_exponent))
-                print('average perplexity per word so far:', np.exp(-perplexity_exponent_total/total_batches/batch_size))
+                print('loss at batch', batches_total, ':', loss_batch)
+                print('average loss per word so far:', loss_total/batches_total/batch_size)
+                print('perplexity at batch', batches_total, ':', np.exp(-perplexity_exponent))
+                print('average perplexity per word so far:', np.exp(-perplexity_exponent_total/batches_total/batch_size))
+                print('average perplexity per word so far:', np.exp(-loss_total/batch_size))
 
     # save the model
     saver.save(session, os.path.join(log_dir, '{}.ckpt'.format(model.name)))
