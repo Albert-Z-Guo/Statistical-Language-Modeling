@@ -404,7 +404,6 @@ with tf.Session(graph=model.graph) as session:
             if batch % 100 == 0 and batch > 0:
                 print('loss at batch', batches_total, ':', loss_batch)
                 print('average loss per word so far:', loss_total/batches_total/batch_size)
-                print('perplexity at batch', batches_total, ':', np.exp(-perplexity_exponent))
                 print('average perplexity per word so far:', np.exp(-perplexity_exponent_total/batches_total/batch_size))
 
     # save the model
