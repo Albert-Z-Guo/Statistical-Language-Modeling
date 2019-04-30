@@ -140,7 +140,7 @@ except:
     del sents_mapped
 
 
-batch_size = 1024
+batch_size = 512
 
 
 def generator(data, labels, vocab_size, mode=1):
@@ -370,10 +370,11 @@ with tf.Session(graph=model.graph) as session:
     t = model.V*(n-1)*model.m +  model.V*model.h + model.h*(n-1)*model.m + model.h + model.V + model.m*(n-1)
 
     learning_rate = epsilon_0
-    total_batches = 0
+    num_batches = 0
     parameter_updates = 0
-    total_loss = 0
+    loss_total = 0
     perplexity_exponent = 0
+    perplexity_batch_total = 0
 
     for epoch in np.arange(num_epochs):
         print('epoch:', epoch + 1)
@@ -385,22 +386,24 @@ with tf.Session(graph=model.graph) as session:
             run_metadata = tf.RunMetadata()
             _, loss_batch, prob_batch, summary = session.run(model.fetches, feed_dict=feed_dict, run_metadata=run_metadata)
 
-            total_batches += 1
+            num_batches += 1
             learning_rate = epsilon_0/(1+r*t)
-            parameter_updates += t * batch_size
-            total_loss += loss_batch
+            parameter_updates += t
+            loss_total += loss_batch
             perplexity_exponent += np.sum(np.log(prob_batch[np.argmax(label, axis=1)][0]))
+            perplexity_batch_total += np.exp(-np.sum(np.log(prob_batch[np.argmax(label, axis=1)][0]))/batch_size)
 
             # record summaries
-            writer.add_summary(summary, total_batches)
+            writer.add_summary(summary, num_batches)
             if batch == (num_batches - 1):
                 writer.add_run_metadata(run_metadata, 'epoch{} batch {}'.format(epoch, batch))
 
             if batch % 100 == 0 and batch > 0:
-                print('loss at batch', total_batches, ':', loss_batch/batch_size)
-                print('average loss so far:', total_loss/total_batches/batch_size)
-                print('perplexity at batch', total_batches, ':', np.exp(-np.sum(np.log(prob_batch[np.argmax(label, axis=1)][0])/batch_size)))
-                print('average perplexity so far:', np.exp(-perplexity_exponent/total_batches/batch_size))
+                print('loss at batch', num_batches, ':', loss_batch/batch_size)
+                print('average loss so far:', loss_total/num_batches/batch_size)
+                print('perplexity at batch', num_batches, ':', np.exp(-np.sum(np.log(prob_batch[np.argmax(label, axis=1)][0])/batch_size)))
+                print('perplexity so far:', np.exp(-perplexity_exponent/num_batches/batch_size))
+                print('average batch-perplexity so far:', perplexity_batch_total/num_batches)
 
     # save the model
     saver.save(session, os.path.join(log_dir, '{}.ckpt'.format(model.name)))
