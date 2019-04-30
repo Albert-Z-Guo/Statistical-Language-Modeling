@@ -177,9 +177,9 @@ training_data = generator(data, labels, len(vocab), mode=1)
 validation_data = generator(data, labels, len(vocab), mode=2)
 test_data = generator(data, labels, len(vocab), mode=3)
 
-training_batches = int(len(data)*0.8)
-validation_batches = int(len(data)*0.1)
-test_batches = int(len(data)*0.1)
+training_batches = int(len(data)*0.8) // batch_size + 1
+validation_batches = int(len(data)*0.1) // batch_size + 1
+test_batches = int(len(data)*0.1) // batch_size + 1
 
 
 class Model:
