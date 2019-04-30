@@ -364,16 +364,16 @@ with tf.Session(graph=model.graph) as session:
     # initialize variables
     tf.global_variables_initializer().run()
 
-    r = 10**(-8) # decrease factor
     epsilon_0 = 10**(-3)
-    # total number of parameters updates (from W, U, H, d, b, and words vectors from C) per training step
+    r = 10**(-8) # decrease factor
+    # number of parameters updates (from W, U, H, d, b, and words vectors from C) per training step
     t = model.V*(n-1)*model.m +  model.V*model.h + model.h*(n-1)*model.m + model.h + model.V + model.m*(n-1)
 
     learning_rate = epsilon_0
-    batches_total = 0
-    parameter_updates = 0
-    loss_total = 0
+    total_batches = 0
+    total_loss = 0
     perplexity_exponent = 0
+    perplexity_exponent_total = 0
 
     for epoch in np.arange(num_epochs):
         print('epoch:', epoch + 1)
@@ -385,22 +385,27 @@ with tf.Session(graph=model.graph) as session:
             run_metadata = tf.RunMetadata()
             _, loss_batch, prob_batch, summary = session.run(model.fetches, feed_dict=feed_dict, run_metadata=run_metadata)
 
-            batches_total += 1
+            # update learning rate
             learning_rate = epsilon_0/(1+r*t)
-            parameter_updates += t
-            loss_total += loss_batch
-            perplexity_exponent += np.sum(np.log(prob_batch[np.argmax(label, axis=1)][0]))
+            t += t
+
+            total_batches += 1
+            total_loss += loss_batch
+
+            prob_batch = prob_batch.T # [batch_size, vocab_size]
+            perplexity_exponent = np.sum(prob_batch[np.arange(len(prob_batch)), np.argmax(label, axis=1)])
+            perplexity_exponent_total += perplexity_exponent
 
             # record summaries
-            writer.add_summary(summary, batches_total)
-            if batch == (batches_total - 1):
+            writer.add_summary(summary, total_batches)
+            if batch == (num_batches - 1):
                 writer.add_run_metadata(run_metadata, 'epoch{} batch {}'.format(epoch, batch))
 
             if batch % 100 == 0 and batch > 0:
-                print('loss at batch', batches_total, ':', loss_batch/batch_size)
-                print('average loss so far:', loss_total/batches_total/batch_size)
-                print('perplexity at batch', batches_total, ':', np.exp(-np.sum(np.log(prob_batch[np.argmax(label, axis=1)][0])/batch_size)))
-                print('perplexity so far:', np.exp(-perplexity_exponent/batches_total/batch_size))
+                print('loss at batch', total_batches, ':', loss_batch)
+                print('average loss per word so far:', total_loss/total_batches/batch_size)
+                print('perplexity at batch', total_batches, ':', np.exp(-perplexity_exponent))
+                print('average perplexity per word so far:', np.exp(-perplexity_exponent_total/total_batches/batch_size))
 
     # save the model
     saver.save(session, os.path.join(log_dir, '{}.ckpt'.format(model.name)))
