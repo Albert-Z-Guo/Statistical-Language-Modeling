@@ -364,26 +364,26 @@ with tf.Session(graph=model.graph) as session:
 
             # collect runtime statistics
             run_metadata = tf.RunMetadata()
-            _, loss_step, prob_step, summary = session.run(model.fetches, feed_dict=feed_dict, run_metadata=run_metadata)
+            _, loss_batch, prob_batch, summary = session.run(model.fetches, feed_dict=feed_dict, run_metadata=run_metadata)
 
-#             _, loss_step, prob_step, summary = session.run([MLP3_optimizer, MLP3_loss, MLP3_prob, summary_merged],
+#             _, loss_batch, prob_batch, summary = session.run([MLP3_optimizer, MLP3_loss, MLP3_prob, summary_merged],
 #                                                             feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
 #                                                             run_metadata=run_metadata)
 
             total_batches += 1
             learning_rate = epsilon_0/(1+r*t)
             parameter_updates += t
-            total_loss += loss_step
-            perplexity_exponent += np.sum(np.log(prob_step[np.argmax(label, axis=1)][0]))
+            total_loss += loss_batch
+            perplexity_exponent += np.sum(np.log(prob_batch[np.argmax(label, axis=1)][0]))
 
             # record summaries
             writer.add_summary(summary, total_batches)
-            if step == (num_batches - 1):
+            if batch == (num_batches - 1):
                 writer.add_run_metadata(run_metadata, 'epoch{} batch {}'.format(epoch, batch))
 
             if batch % 100 == 0 and batch > 0:
-                print('average loss at batch ', total_batches, ':', total_loss/total_batches)
-                print('perplexity at batch', total_batches, ':', np.exp(-perplexity_exponent/(batch_size*total_batches)))
+                print('average loss at batch ', total_batches, ':', total_loss/total_batches/batch_size)
+                print('perplexity at batch', total_batches, ':', np.exp(-perplexity_exponent/total_batches/batch_size))
 
     # save the model
     saver.save(session, os.path.join(log_dir, '{}.ckpt'.format(model.name)))
