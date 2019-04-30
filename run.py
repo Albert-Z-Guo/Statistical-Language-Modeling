@@ -374,7 +374,7 @@ with tf.Session(graph=model.graph) as session:
             learning_rate = epsilon_0/(1+r*t)
             parameter_updates += t
             total_loss += loss_step
-            perplexity_exponent += np.log(prob_step[np.argmax(label)][0])
+            perplexity_exponent += np.sum(np.log(prob_step[np.argmax(label, axis=1)][0]))
 
             # record summaries
             writer.add_summary(summary, total_batches)
@@ -383,7 +383,7 @@ with tf.Session(graph=model.graph) as session:
 
             if batch % 100 == 0 and batch > 0:
                 print('average loss at batch ', total_batches, ':', total_loss/total_batches)
-                print('perplexity at batch', total_batches, ':', np.exp(-perplexity_exponent/total_batches))
+                print('perplexity at batch', total_batches, ':', np.exp(-perplexity_exponent/(batch_size*total_batches)))
 
     # save the model
     saver.save(session, os.path.join(log_dir, '{}.ckpt'.format(model.name)))
