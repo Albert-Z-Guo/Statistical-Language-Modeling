@@ -140,7 +140,7 @@ except:
     del sents_mapped
 
 
-batch_size = 512
+batch_size = 256
 
 
 def generator(data, labels, vocab_size, mode=1):
@@ -374,7 +374,6 @@ with tf.Session(graph=model.graph) as session:
     parameter_updates = 0
     loss_total = 0
     perplexity_exponent = 0
-    perplexity_batch_total = 0
 
     for epoch in np.arange(num_epochs):
         print('epoch:', epoch + 1)
@@ -391,7 +390,6 @@ with tf.Session(graph=model.graph) as session:
             parameter_updates += t
             loss_total += loss_batch
             perplexity_exponent += np.sum(np.log(prob_batch[np.argmax(label, axis=1)][0]))
-            perplexity_batch_total += np.exp(-np.sum(np.log(prob_batch[np.argmax(label, axis=1)][0]))/batch_size)
 
             # record summaries
             writer.add_summary(summary, batches_total)
@@ -403,7 +401,6 @@ with tf.Session(graph=model.graph) as session:
                 print('average loss so far:', loss_total/batches_total/batch_size)
                 print('perplexity at batch', batches_total, ':', np.exp(-np.sum(np.log(prob_batch[np.argmax(label, axis=1)][0])/batch_size)))
                 print('perplexity so far:', np.exp(-perplexity_exponent/batches_total/batch_size))
-                print('average batch-perplexity so far:', perplexity_batch_total/batches_total)
 
     # save the model
     saver.save(session, os.path.join(log_dir, '{}.ckpt'.format(model.name)))
