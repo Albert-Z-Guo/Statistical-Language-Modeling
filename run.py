@@ -357,7 +357,6 @@ model = Model(name='MLP1')
 # model = Model(name='MLP7')
 # model = Model(name='MLP9')
 
-'''
 # create TensorBoard directory
 log_dir = model.name + '_log'
 if not os.path.exists(log_dir):
@@ -420,17 +419,17 @@ with tf.Session(graph=model.graph) as session:
     file = open('{}_traininig.txt'.format(model.name), 'w')
     file.write('final perplexity: ' + str(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
     file.close()
-'''
+
 
 with tf.Session(graph=model.graph) as sess:
     saver = tf.train.Saver()
-    saver.restore(sess, '{}.ckpt'.format(model.name))
+    saver.restore(sess, save_path=os.path.join(log_dir, '{}.ckpt'.format(model.name)))
 
     num_batches = validation_batches
-    total_batches = 0
-    parameter_updates = 0
-    total_loss = 0
+    batches_total = 0
+    loss_total = 0
     perplexity_exponent = 0
+    perplexity_exponent_total = 0
 
     for batch in tqdm(np.arange(num_batches)):
         data_training, label = next(validation_data)
@@ -445,7 +444,7 @@ with tf.Session(graph=model.graph) as sess:
         perplexity_exponent = np.sum(np.log(prob_batch[np.arange(len(prob_batch)), np.argmax(label, axis=1)]))
         perplexity_exponent_total += perplexity_exponent
 
-        if batch % 1 == 0 and batch > 0:
+        if batch % 100 == 0 and batch > 0:
             print('loss at batch', total_batches, ':', loss_batch)
             print('average loss per word so far:', total_loss/total_batches/batch_size)
             print('average perplexity per word so far:', np.exp(-perplexity_exponent_total/total_batches/batch_size))
