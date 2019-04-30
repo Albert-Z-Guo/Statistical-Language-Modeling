@@ -282,61 +282,75 @@ class Model:
                         summary_merged]
 
 
-# MLP3_graph = tf.Graph()
-# with MLP3_graph.as_default():
-#     with tf.name_scope('inputs'):
-#         words = tf.placeholder(tf.int32, shape=[batch_size, n-1])
-#         y = tf.placeholder(tf.int32, shape=[batch_size, V])
-#         epsilon_t = tf.placeholder(tf.float64, shape=None)
-#
-#     with tf.name_scope('parameters'):
-#         C = tf.Variable(tf.random_uniform([V, m], -1.0, 1.0))
-#         x = tf.transpose(tf.reshape(tf.nn.embedding_lookup(C, words), [-1, (n-1)*m])) # [(n-1)*m, batch_size]
-#         W = tf.Variable(tf.truncated_normal([V, (n-1)*m], stddev=1.0/np.sqrt((n-1)*m)))
-#         M1 = tf.Variable(tf.truncated_normal([V, V], stddev=1.0/np.sqrt(V)))
-#         M2 = tf.Variable(tf.truncated_normal([V, V], stddev=1.0/np.sqrt(V)))
-#         b1 = tf.Variable(tf.zeros([V, batch_size]))
-#         b2 = tf.Variable(tf.zeros([V, batch_size]))
-#         b3 = tf.Variable(tf.zeros([V, batch_size]))
-#
-#     with tf.name_scope('direct_connections'):
-#         Wx = tf.matmul(W, x)
-#
-#     with tf.name_scope('MLPs'):
-#         MLP1 = b1 + tf.matmul(W, x)
-#         MLP2 = b2 + tf.matmul(M1, MLP1)
-#         MLP3 = tf.matmul(M2, MLP2)
-#
-#     with tf.name_scope('MLP_logits'):
-#         MLP3_logits = b3 + Wx + MLP3
-#
-#     MLP3_prob = tf.nn.softmax(logits=MLP3_logits, axis=0)
-#
-#     with tf.name_scope('MLP_losses'):
-#         MLP3_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y, logits=tf.transpose(MLP3_logits)))
-#
-#     tf.summary.scalar('MLP3_loss', MLP3_loss)
-#
-#     with tf.name_scope('optimizers'):
-#         Custom_Optimizer = tf.contrib.opt.extend_with_decoupled_weight_decay(tf.train.AdamOptimizer)
-#         MLP3_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP3_loss)
-#         # MLP3_optimizer = tf.train.AdamOptimizer(learning_rate=epsilon_t).minimize(MLP3_loss) # without weight decay
-#
-#     # merge all summaries
-#     summary_merged = tf.summary.merge_all()
+class MLP3:
+    '''
+    # the following graph contains MLP 3 with h = 0 only
+    # MLP 3 model: y = b3 + Wx + M3(b2 + M1tanh(b1 + Wx))
+    '''
+    def __init__(self, V=len(vocab), batch_size=batch_size, weight_decay=10**(-4)):
+        m = 60
+
+        self.name = 'MLP3'
+        self.V = V
+        self.h = 0
+        self.m = m
+
+        self.graph = tf.Graph()
+
+        with self.graph.as_default():
+            with tf.name_scope('inputs'):
+                self.words = tf.placeholder(tf.int32, shape=[batch_size, n-1])
+                self.y = tf.placeholder(tf.int32, shape=[batch_size, V])
+                self.epsilon_t = tf.placeholder(tf.float64, shape=None)
+
+            with tf.name_scope('parameters'):
+                C = tf.Variable(tf.random_uniform([V, m], -1.0, 1.0))
+                x = tf.transpose(tf.reshape(tf.nn.embedding_lookup(C, self.words), [-1, (n-1)*m])) # [(n-1)*m, batch_size]
+                W = tf.Variable(tf.truncated_normal([V, (n-1)*m], stddev=1.0/np.sqrt((n-1)*m)))
+                M1 = tf.Variable(tf.truncated_normal([(n-1)*m, (n-1)*m], stddev=1.0/np.sqrt(V)))
+                M2 = tf.Variable(tf.truncated_normal([(n-1)*m, (n-1)*m], stddev=1.0/np.sqrt(V)))
+                M3 = tf.Variable(tf.truncated_normal([V, (n-1)*m], stddev=1.0/np.sqrt(V)))
+                b1 = tf.Variable(tf.zeros([(n-1)*m, batch_size]))
+                b2 = tf.Variable(tf.zeros([(n-1)*m, batch_size]))
+                b3 = tf.Variable(tf.zeros([V, batch_size]))
+
+            with tf.name_scope('direct_connections'):
+                Wx = tf.matmul(W, x)
+
+            with tf.name_scope('MLPs'):
+                MLP1 = b1 + tf.matmul(M1, x)
+                MLP2 = b2 + tf.matmul(M2, tf.tanh(MLP1))
+                MLP3 = tf.matmul(M3, MLP2)
+
+            with tf.name_scope('MLP_logits'):
+                MLP3_logits = b3 + Wx + MLP3
+
+            MLP3_prob = tf.nn.softmax(logits=MLP3_logits, axis=0)
+
+            with tf.name_scope('MLP_losses'):
+                MLP3_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=tf.transpose(MLP3_logits)))
+
+            tf.summary.scalar('MLP3_loss', MLP3_loss)
+
+            with tf.name_scope('optimizers'):
+                Custom_Optimizer = tf.contrib.opt.extend_with_decoupled_weight_decay(tf.train.AdamOptimizer)
+                MLP3_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=self.epsilon_t).minimize(MLP3_loss)
+
+            # merge all summaries
+            summary_merged = tf.summary.merge_all()
+
+        self.fetches = [MLP3_optimizer, MLP3_loss, MLP3_prob, summary_merged]
 
 
 num_epochs = 20
 num_batches = training_batches
 
-r = 10**(-8) # decrease factor
-epsilon_0 = 10**(-3)
-
 # select model
 model = Model(name='MLP1')
-
-# total number of parameters updates (from W, U, H, d, b, and words vectors from C) per training step
-t = model.V*(n-1)*model.m +  model.V*model.h + model.h*(n-1)*model.m + model.h + model.V + model.m*(n-1)
+# model = MLP3()
+# model = Model(name='MLP5')
+# model = Model(name='MLP7')
+# model = Model(name='MLP9')
 
 # create TensorBoard directory
 log_dir = model.name + 'log'
@@ -349,6 +363,11 @@ with tf.Session(graph=model.graph) as session:
 
     # initialize variables
     tf.global_variables_initializer().run()
+
+    r = 10**(-8) # decrease factor
+    epsilon_0 = 10**(-3)
+    # total number of parameters updates (from W, U, H, d, b, and words vectors from C) per training step
+    t = model.V*(n-1)*model.m +  model.V*model.h + model.h*(n-1)*model.m + model.h + model.V + model.m*(n-1)
 
     learning_rate = epsilon_0
     total_batches = 0
@@ -366,13 +385,9 @@ with tf.Session(graph=model.graph) as session:
             run_metadata = tf.RunMetadata()
             _, loss_batch, prob_batch, summary = session.run(model.fetches, feed_dict=feed_dict, run_metadata=run_metadata)
 
-#             _, loss_batch, prob_batch, summary = session.run([MLP3_optimizer, MLP3_loss, MLP3_prob, summary_merged],
-#                                                             feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
-#                                                             run_metadata=run_metadata)
-
             total_batches += 1
             learning_rate = epsilon_0/(1+r*t)
-            parameter_updates += t
+            parameter_updates += t * batch_size
             total_loss += loss_batch
             perplexity_exponent += np.sum(np.log(prob_batch[np.argmax(label, axis=1)][0]))
 
