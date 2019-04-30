@@ -353,7 +353,7 @@ model = Model(name='MLP1')
 # model = Model(name='MLP9')
 
 # create TensorBoard directory
-log_dir = model.name + 'log'
+log_dir = model.name + '_log'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
@@ -387,7 +387,7 @@ with tf.Session(graph=model.graph) as session:
 
             # update learning rate
             learning_rate = epsilon_0/(1+r*t)
-            t += t/1000
+            t += t/100
 
             batches_total += 1
             loss_total += loss_batch
@@ -403,11 +403,11 @@ with tf.Session(graph=model.graph) as session:
 
             if batch % 100 == 0 and batch > 0:
                 print('loss at batch', batches_total, ':', loss_batch)
-                print('average loss per word so far:', loss_total/batches_total/batch_size)
-                print('average perplexity per word so far:', np.exp(-perplexity_exponent_total/batches_total/batch_size))
+                print('average loss per word so far: {:.3}'.format(loss_total/batches_total/batch_size))
+                print('average perplexity per word so far: {:.3}'.format(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
 
     # save the model
-    saver.save(session, os.path.join(log_dir, '{}.ckpt'.format(model.name)))
+    saver.save(sess=session, save_path=log_dir)
     writer.close()
 
 # record results
