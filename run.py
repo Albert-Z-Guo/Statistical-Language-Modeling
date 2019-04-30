@@ -326,12 +326,11 @@ class Model:
 #     summary_merged = tf.summary.merge_all()
 
 
-epsilon_0 = 10**(-3)
-r = 10**(-8) # decrease factor
-
 num_epochs = 20
-num_steps = training_batches
-parameter_updates = 0
+num_batches = training_batches
+
+r = 10**(-8) # decrease factor
+epsilon_0 = 10**(-3)
 
 # select model
 model = Model(name='MLP1')
@@ -350,15 +349,16 @@ with tf.Session(graph=model.graph) as session:
 
     # initialize variables
     tf.global_variables_initializer().run()
-    total_loss = 0
-    perplexity_exponent = 0
 
     learning_rate = epsilon_0
     total_batches = 0
+    parameter_updates = 0
+    total_loss = 0
+    perplexity_exponent = 0
 
     for epoch in np.arange(num_epochs):
         print('epoch:', epoch + 1)
-        for batch in tqdm_notebook(np.arange(num_batches)):
+        for batch in tqdm(np.arange(num_batches)):
             data_training, label = next(training_data)
             feed_dict={model.words:data_training, model.y:label, model.epsilon_t:learning_rate}
 
