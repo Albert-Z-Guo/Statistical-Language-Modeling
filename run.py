@@ -140,7 +140,7 @@ except:
     del sents_mapped
 
 
-batch_size = 64
+batch_size = 1024
 
 
 def generator(data, labels, vocab_size, mode=1):
@@ -384,7 +384,7 @@ with tf.Session(graph=model.graph) as session:
             if batch % 100 == 0 and batch > 0:
                 print('loss at batch', total_batches, ':', loss_batch/batch_size)
                 print('average loss so far:', total_loss/total_batches/batch_size)
-                print('perplexity at batch ', total_batches, ':', np.exp(-np.sum(np.log(prob_batch[np.argmax(label, axis=1)][0])/batch_size)))
+                print('perplexity at batch', total_batches, ':', np.exp(-np.sum(np.log(prob_batch[np.argmax(label, axis=1)][0])/batch_size)))
                 print('average perplexity so far:', np.exp(-perplexity_exponent/total_batches/batch_size))
 
     # save the model
