@@ -393,7 +393,7 @@ with tf.Session(graph=model.graph) as session:
             loss_total += loss_batch
 
             prob_batch = prob_batch.T # [batch_size, vocab_size]
-            perplexity_exponent = np.sum(prob_batch[np.arange(len(prob_batch)), np.argmax(label, axis=1)])
+            perplexity_exponent = np.sum(np.log(prob_batch[np.arange(len(prob_batch)), np.argmax(label, axis=1)]))
             perplexity_exponent_total += perplexity_exponent
 
             # record summaries
@@ -406,7 +406,6 @@ with tf.Session(graph=model.graph) as session:
                 print('average loss per word so far:', loss_total/batches_total/batch_size)
                 print('perplexity at batch', batches_total, ':', np.exp(-perplexity_exponent))
                 print('average perplexity per word so far:', np.exp(-perplexity_exponent_total/batches_total/batch_size))
-                print('average perplexity per word so far:', np.exp(-loss_total/batch_size))
 
     # save the model
     saver.save(session, os.path.join(log_dir, '{}.ckpt'.format(model.name)))
