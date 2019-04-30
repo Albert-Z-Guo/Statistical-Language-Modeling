@@ -89,6 +89,9 @@ try:
 
     with open('labels.pickle', 'rb') as file:
         labels = pickle.load(file)
+
+    with open('vocab.pickle', 'rb') as file:
+        vocab = pickle.load(file)
 except:
     # download corpus
     # sents = nltk.corpus.brown.sents()
@@ -112,11 +115,6 @@ except:
     # reduce memory
     del sents
 
-    # check variable sizes
-    print('sents_mapped size: {:.3} MB'.format(sys.getsizeof(sents_mapped) / 1024**2))
-    print('vocab size: {:.3} MB'.format(sys.getsizeof(vocab) / 1024**2))
-    print('vocab_reversed size: {:.3} MB'.format(sys.getsizeof(vocab_reversed) / 1024**2))
-
     start_time = time.time()
     data, labels = generate_data(sents_mapped, n)
     print('\ngenerated data in {:.4} s'.format(time.time()-start_time))
@@ -134,6 +132,9 @@ except:
 
     with open('labels.pickle', 'wb') as file:
         pickle.dump(labels, file, protocol=pickle.HIGHEST_PROTOCOL)
+
+    with open('vocab.pickle', 'wb') as file:
+        pickle.dump(vocab, file, protocol=pickle.HIGHEST_PROTOCOL)
 
     # reduce memory
     del sents_mapped
