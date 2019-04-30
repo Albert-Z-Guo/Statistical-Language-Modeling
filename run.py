@@ -183,7 +183,6 @@ class Model:
     e.g. MLP 1 model: y = b + Wx + Utanh(d + Hx) where MLP 1 is d + Hx
     '''
     def __init__(self, name, V=len(vocab), batch_size=batch_size, weight_decay=10**(-4)):
-        self.name = name
         if name == 'MLP1':
             h = 50
             m = 60
@@ -193,6 +192,11 @@ class Model:
         elif name == 'MLP9':
             h = 100
             m = 30
+
+        self.name = name
+        self.V = V
+        self.h = h
+        self.m = m
 
         self.graph = tf.Graph()
         with self.graph.as_default():
@@ -324,8 +328,6 @@ class Model:
 
 epsilon_0 = 10**(-3)
 r = 10**(-8) # decrease factor
-# total number of parameters updates (from W, U, H, d, b, and words vectors from C) per training step
-t = V*(n-1)*m + V*h + h*(n-1)*m + h + V + m*(n-1)
 
 num_epochs = 20
 num_steps = training_steps
@@ -333,6 +335,9 @@ parameter_updates = 0
 
 # select model
 model = Model(name='MLP1')
+
+# total number of parameters updates (from W, U, H, d, b, and words vectors from C) per training step
+t = model.V*(n-1)*model.m +  model.V*model.h + model.h*(n-1)*model.m + model.h + model.V + model.m*(n-1)
 
 # create TensorBoard directory
 log_dir = model.name + 'log'
