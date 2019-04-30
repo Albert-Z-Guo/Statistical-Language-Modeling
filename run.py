@@ -74,7 +74,6 @@ print('words num:', len(words_cleansed))
 print('vocab size:', len(vocab))
 
 # reduce memory
-del words
 del sents
 
 
