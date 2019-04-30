@@ -173,7 +173,7 @@ def generator(data, labels, vocab_size, mode=1):
         yield np.array(data_batch), np.array(labels_batch)
 
 
-training_steps = (800000 - 5)//batch_size + 1
+training_batches = (800000 - 5)//batch_size + 1
 training_data = generator(data, labels, len(vocab), mode=1)
 
 
@@ -330,7 +330,7 @@ epsilon_0 = 10**(-3)
 r = 10**(-8) # decrease factor
 
 num_epochs = 20
-num_steps = training_steps
+num_steps = training_batches
 parameter_updates = 0
 
 # select model
@@ -354,11 +354,11 @@ with tf.Session(graph=model.graph) as session:
     perplexity_exponent = 0
 
     learning_rate = epsilon_0
-    total_steps = 0
+    total_batches = 0
 
     for epoch in np.arange(num_epochs):
         print('epoch:', epoch + 1)
-        for step in tqdm(np.arange(num_steps)):
+        for batch in tqdm_notebook(np.arange(num_batches)):
             data_training, label = next(training_data)
             feed_dict={model.words:data_training, model.y:label, model.epsilon_t:learning_rate}
 
@@ -370,20 +370,20 @@ with tf.Session(graph=model.graph) as session:
 #                                                             feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
 #                                                             run_metadata=run_metadata)
 
-            total_steps += 1
+            total_batches += 1
             learning_rate = epsilon_0/(1+r*t)
             parameter_updates += t
             total_loss += loss_step
             perplexity_exponent += np.log(prob_step[np.argmax(label)][0])
 
             # record summaries
-            writer.add_summary(summary, total_steps)
-            if step == (num_steps - 1):
-                writer.add_run_metadata(run_metadata, 'epoch{} step {}'.format(epoch, step))
+            writer.add_summary(summary, total_batches)
+            if step == (num_batches - 1):
+                writer.add_run_metadata(run_metadata, 'epoch{} batch {}'.format(epoch, batch))
 
-            if step % 100 == 0 and step > 0:
-                print('average loss at step ', total_steps, ':', total_loss/total_steps)
-                print('perplexity at step', total_steps, ':', np.exp(-perplexity_exponent/total_steps))
+            if batch % 100 == 0 and batch > 0:
+                print('average loss at batch ', total_batches, ':', total_loss/total_batches)
+                print('perplexity at batch', total_batches, ':', np.exp(-perplexity_exponent/total_batches))
 
     # save the model
     saver.save(session, os.path.join(log_dir, '{}.ckpt'.format(model.name)))
@@ -391,5 +391,5 @@ with tf.Session(graph=model.graph) as session:
 
 # record results
 file = open('{}_results.txt'.fromat(model.name), 'w')
-file.write('final perplexity: ' + str(np.exp(-perplexity_exponent/total_steps)))
+file.write('final perplexity: ' + str(np.exp(-perplexity_exponent/total_steps))/batch_size)
 file.close()
