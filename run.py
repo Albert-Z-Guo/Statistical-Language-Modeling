@@ -35,6 +35,7 @@ def cleanse(sents):
             words_cleansed.append(word)
     return words_cleansed, sents_cleansed
 
+
 def map_words_sents(words, sents):
     # select vocabulary, all punctuations included
     vocab = {}
@@ -54,30 +55,9 @@ def map_words_sents(words, sents):
     return np.array(sents_mapped), vocab, vocab_reversed
 
 
-# downlaod corpus
-# sents = nltk.corpus.brown.sents()
-
-corpora = ''
-with open('corpora/brown.txt', 'r') as file:
-    for row in file:
-        if row == '\n':
-            corpora += ' '
-        else:
-            corpora += row.replace('\n', '')
-
-sents = sent_tokenize(corpora)
-words_cleansed, sents_cleansed = cleanse(sents)
-sents_mapped, vocab, vocab_reversed = map_words_sents(words_cleansed, sents_cleansed)
-
-print('sentence num:', len(sents_cleansed))
-print('words num:', len(words_cleansed))
-print('vocab size:', len(vocab))
-
-# reduce memory
-del sents
-
-
 n = 5 # order of the model
+
+
 def generate_data(sents_mapped, n):
     data = [] # sets of n-word sequence
     labels = [] # sets of 1-word prediction
@@ -110,7 +90,27 @@ try:
     with open('labels.pickle', 'rb') as file:
         labels = pickle.load(file)
 except:
+    # downlaod corpus
+    # sents = nltk.corpus.brown.sents()
 
+    corpora = ''
+    with open('corpora/brown.txt', 'r') as file:
+        for row in file:
+            if row == '\n':
+                corpora += ' '
+            else:
+                corpora += row.replace('\n', '')
+
+    sents = sent_tokenize(corpora)
+    words_cleansed, sents_cleansed = cleanse(sents)
+    sents_mapped, vocab, vocab_reversed = map_words_sents(words_cleansed, sents_cleansed)
+
+    print('sentence num:', len(sents_cleansed))
+    print('words num:', len(words_cleansed))
+    print('vocab size:', len(vocab))
+
+    # reduce memory
+    del sents
 
     # check variable sizes
     print('sents_mapped size: {:.3} MB'.format(sys.getsizeof(sents_mapped) / 1024**2))
@@ -140,6 +140,7 @@ except:
 
 
 batch_size = 64
+
 
 def generator(data, labels, vocab_size, training=True):
     if training:
