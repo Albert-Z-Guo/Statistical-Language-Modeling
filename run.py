@@ -411,5 +411,5 @@ with tf.Session(graph=model.graph) as session:
 
 # record results
 file = open('{}_results.txt'.format(model.name), 'w')
-file.write('final perplexity: ' + str(np.exp(-perplexity_exponent/total_steps))/batch_size)
+file.write('final perplexity: ' + str(np.exp(-perplexity_exponent/num_batches/batch_size))
 file.close()
