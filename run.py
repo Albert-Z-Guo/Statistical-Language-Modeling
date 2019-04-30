@@ -387,7 +387,7 @@ with tf.Session(graph=model.graph) as session:
 
             # update learning rate
             learning_rate = epsilon_0/(1+r*t)
-            t += t/10
+            t += t
 
             batches_total += 1
             loss_total += loss_batch
