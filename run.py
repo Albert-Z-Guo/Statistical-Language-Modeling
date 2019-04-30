@@ -6,12 +6,33 @@ import pickle
 import collections
 
 import nltk
-nltk.download('brown') # reference: http://www.nltk.org/nltk_data/
+from nltk.tokenize import sent_tokenize
+# nltk.download('brown') # reference: http://www.nltk.org/nltk_data/
 import numpy as np
 import tensorflow as tf
 from tqdm import tqdm_notebook
 from tqdm import tqdm
 
+
+def _contains_letter(string):
+    if re.search(re.compile(r'\w'), string): # if string contains an alphanumeric character
+        return True
+    return False
+
+
+def cleanse(sents):
+    sents_cleansed = []
+    for sent in sents:
+        sent_cleansed = [word for word in sent.split() if _contains_letter(word)] # filter out punctuations
+        if len(sent_cleansed) > 0: # filter out empty lists
+#             sent_cleansed[0] = sent_cleansed[0].lower() # lower the first letter in a sentence
+            sents_cleansed.append(sent_cleansed)
+
+    words_cleansed = []
+    for sent in sents_cleansed:
+        for word in sent:
+            words_cleansed.append(word)
+    return words_cleansed, sents_cleansed
 
 def map_words_sents(words, sents):
     # select vocabulary, all punctuations included
@@ -33,12 +54,22 @@ def map_words_sents(words, sents):
 
 
 # downlaod corpus
-words = nltk.corpus.brown.words()
-sents = nltk.corpus.brown.sents()
-sents_mapped, vocab, vocab_reversed = map_words_sents(words, sents)
+# sents = nltk.corpus.brown.sents()
 
-print('sentence num:', len(sents))
-print('words num:', len(words))
+corpora = ''
+with open('corpora/brown.txt', 'r') as file:
+    for row in file:
+        if row == '\n':
+            corpora += ' '
+        else:
+            corpora += row.replace('\n', '')
+
+sents = sent_tokenize(corpora)
+words_cleansed, sents_cleansed = cleanse(sents)
+sents_mapped, vocab, vocab_reversed = map_words_sents(words_cleansed, sents_cleansed)
+
+print('sentence num:', len(sents_cleansed))
+print('words num:', len(words_cleansed))
 print('vocab size:', len(vocab))
 
 # reduce memory
@@ -329,7 +360,7 @@ with tf.Session(graph=MLP3_graph) as session:
             learning_rate = epsilon_0/(1+r*t)
             parameter_updates += t
             total_loss += loss_step
-            perplexity_exponent += np.log(prob_step[np.argmax(label)][0])
+            perplexity_exponent += np.log(prob_step[np.argmax(label)][0] + r)
 
             # record summaries
             writer.add_summary(summary, total_steps)
