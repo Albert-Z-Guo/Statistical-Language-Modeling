@@ -358,7 +358,7 @@ with tf.Session(graph=model.graph) as session:
 
     for epoch in np.arange(num_epochs):
         print('epoch:', epoch + 1)
-        for step in tqdm_notebook(np.arange(num_steps)):
+        for step in tqdm(np.arange(num_steps)):
             data_training, label = next(training_data)
             feed_dict={model.words:data_training, model.y:label, model.epsilon_t:learning_rate}
 
