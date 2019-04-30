@@ -90,7 +90,7 @@ try:
     with open('labels.pickle', 'rb') as file:
         labels = pickle.load(file)
 except:
-    # downlaod corpus
+    # download corpus
     # sents = nltk.corpus.brown.sents()
 
     corpora = ''
@@ -142,12 +142,16 @@ except:
 batch_size = 64
 
 
-def generator(data, labels, vocab_size, training=True):
-    if training:
+def generator(data, labels, vocab_size, mode=1):
+    # mode = 1 for training, 2 for validation, 3 for testing
+    if mode == 1:
         i = 0
-        end = int(len(data)*0.8)
+        end = 800000 - 5 - 1
+    elif model == 2:
+        i = 800000 - 1
+        end = 800000 + 100000 - 5 - 1
     else:
-        i = int(len(data)*0.8) + 1
+        i = 800000 + 100000
         end = len(data) - 1
 
     while True:
@@ -168,93 +172,109 @@ def generator(data, labels, vocab_size, training=True):
         yield np.array(data_batch), np.array(labels_batch)
 
 
-training_steps = len(data[:int(len(data)*0.8)])//128 + 1
-training_data = generator(data, labels, len(vocab), training=True)
+training_steps = (800000 - 5)//batch_size + 1
+training_data = generator(data, labels, len(vocab), mode=1)
 
 
-# the following graph contains MLP 1, MLP 5, MLP 7, and MLP 9 loss optimizations
-# MLP 1 model: y = b + Wx + Utanh(d + Hx) where MLP 1 is d + Hx
-h = 50
-V = len(vocab) # vocabulary size
-m = 60 # embedding size
-weight_decay = 10**(-4)
+class Model:
+    '''
+    the following graph contains MLP 1, MLP 5, MLP 7, and MLP 9 loss optimizations
+    e.g. MLP 1 model: y = b + Wx + Utanh(d + Hx) where MLP 1 is d + Hx
+    '''
+    def __init__(self, name, V=len(vocab), batch_size=batch_size, weight_decay=10**(-4)):
+        self.name = name
+        if name == 'MLP1':
+            h = 50
+            m = 60
+        elif name == 'MLP5' or name == 'MLP7':
+            h = 50
+            m = 30
+        elif name == 'MLP9':
+            h = 100
+            m = 30
 
-graph = tf.Graph()
-with graph.as_default():
-    with tf.name_scope('inputs'):
-        words = tf.placeholder(tf.int32, shape=[batch_size, n-1])
-        y = tf.placeholder(tf.int32, shape=[batch_size, V])
-        epsilon_t = tf.placeholder(tf.float64, shape=None)
+        self.graph = tf.Graph()
+        with self.graph.as_default():
+            with tf.name_scope('inputs'):
+                self.words = tf.placeholder(tf.int32, shape=[batch_size, n-1])
+                self.y = tf.placeholder(tf.int32, shape=[batch_size, V])
+                self.epsilon_t = tf.placeholder(tf.float64, shape=None)
 
-    with tf.name_scope('parameters'):
-        C = tf.Variable(tf.random_uniform([V, m], -1.0, 1.0))
-        x = tf.transpose(tf.reshape(tf.nn.embedding_lookup(C, words), [-1, (n-1)*m])) # [(n-1)*m, batch_size]
-        H = tf.Variable(tf.truncated_normal([h, (n-1)*m], stddev=1.0/np.sqrt((n-1)*m)))
-        U = tf.Variable(tf.truncated_normal([V, h], stddev=1.0/np.sqrt(h)))
-        W = tf.Variable(tf.truncated_normal([V, (n-1)*m], stddev=1.0/np.sqrt((n-1)*m)))
+            with tf.name_scope('parameters'):
+                C = tf.Variable(tf.random_uniform([V, m], -1.0, 1.0))
+                x = tf.transpose(tf.reshape(tf.nn.embedding_lookup(C, self.words), [-1, (n-1)*m])) # [(n-1)*m, batch_size]
+                H = tf.Variable(tf.truncated_normal([h, (n-1)*m], stddev=1.0/np.sqrt((n-1)*m)))
+                U = tf.Variable(tf.truncated_normal([V, h], stddev=1.0/np.sqrt(h)))
+                W = tf.Variable(tf.truncated_normal([V, (n-1)*m], stddev=1.0/np.sqrt((n-1)*m)))
 
-        b = tf.Variable(tf.zeros([V, batch_size]))
-        d = tf.Variable(tf.zeros([h, batch_size]))
-        d2 = tf.Variable(tf.zeros([h, batch_size]))
-        d3 = tf.Variable(tf.zeros([h, batch_size]))
-        d4 = tf.Variable(tf.zeros([h, batch_size]))
-        d5 = tf.Variable(tf.zeros([h, batch_size]))
-        d6 = tf.Variable(tf.zeros([h, batch_size]))
-        d7 = tf.Variable(tf.zeros([h, batch_size]))
-        d8 = tf.Variable(tf.zeros([h, batch_size]))
-        hid2 = tf.Variable(tf.truncated_normal([h, h], stddev=1.0/np.sqrt(h)))
-        hid3 = tf.Variable(tf.truncated_normal([h, h], stddev=1.0/np.sqrt(h)))
-        hid4 = tf.Variable(tf.truncated_normal([h, h], stddev=1.0/np.sqrt(h)))
-        hid5 = tf.Variable(tf.truncated_normal([h, h], stddev=1.0/np.sqrt(h)))
-        hid6 = tf.Variable(tf.truncated_normal([h, h], stddev=1.0/np.sqrt(h)))
-        hid7 = tf.Variable(tf.truncated_normal([h, h], stddev=1.0/np.sqrt(h)))
-        hid8 = tf.Variable(tf.truncated_normal([h, h], stddev=1.0/np.sqrt(h)))
+                b = tf.Variable(tf.zeros([V, batch_size]))
+                d = tf.Variable(tf.zeros([h, batch_size]))
+                d2 = tf.Variable(tf.zeros([h, batch_size]))
+                d3 = tf.Variable(tf.zeros([h, batch_size]))
+                d4 = tf.Variable(tf.zeros([h, batch_size]))
+                d5 = tf.Variable(tf.zeros([h, batch_size]))
+                d6 = tf.Variable(tf.zeros([h, batch_size]))
+                d7 = tf.Variable(tf.zeros([h, batch_size]))
+                d8 = tf.Variable(tf.zeros([h, batch_size]))
+                hid2 = tf.Variable(tf.truncated_normal([h, h], stddev=1.0/np.sqrt(h)))
+                hid3 = tf.Variable(tf.truncated_normal([h, h], stddev=1.0/np.sqrt(h)))
+                hid4 = tf.Variable(tf.truncated_normal([h, h], stddev=1.0/np.sqrt(h)))
+                hid5 = tf.Variable(tf.truncated_normal([h, h], stddev=1.0/np.sqrt(h)))
+                hid6 = tf.Variable(tf.truncated_normal([h, h], stddev=1.0/np.sqrt(h)))
+                hid7 = tf.Variable(tf.truncated_normal([h, h], stddev=1.0/np.sqrt(h)))
+                hid8 = tf.Variable(tf.truncated_normal([h, h], stddev=1.0/np.sqrt(h)))
 
-    with tf.name_scope('direct_connections'):
-        Wx = tf.matmul(W, x)
+            with tf.name_scope('direct_connections'):
+                Wx = tf.matmul(W, x)
 
-    with tf.name_scope('MLPs'):
-        MLP1 = d + tf.matmul(H, x)
-        MLP2 = d2 + tf.matmul(hid2, tf.tanh(MLP1))
-        MLP3 = d3 + tf.matmul(hid3, tf.tanh(MLP2))
-        MLP4 = d4 + tf.matmul(hid4, tf.tanh(MLP3))
-        MLP5 = d5 + tf.matmul(hid5, tf.tanh(MLP4))
-        MLP6 = d6 + tf.matmul(hid6, tf.tanh(MLP5))
-        MLP7 = d7 + tf.matmul(hid7, tf.tanh(MLP6))
-        MLP8 = d8 + tf.matmul(hid8, tf.tanh(MLP7))
+            with tf.name_scope('MLPs'):
+                MLP1 = d + tf.matmul(H, x)
+                MLP2 = d2 + tf.matmul(hid2, tf.tanh(MLP1))
+                MLP3 = d3 + tf.matmul(hid3, tf.tanh(MLP2))
+                MLP4 = d4 + tf.matmul(hid4, tf.tanh(MLP3))
+                MLP5 = d5 + tf.matmul(hid5, tf.tanh(MLP4))
+                MLP6 = d6 + tf.matmul(hid6, tf.tanh(MLP5))
+                MLP7 = d7 + tf.matmul(hid7, tf.tanh(MLP6))
+                MLP8 = d8 + tf.matmul(hid8, tf.tanh(MLP7))
 
-    with tf.name_scope('MLP_logits'):
-        MLP1_logits = b + Wx + tf.matmul(U, tf.tanh(MLP1))
-        MLP5_logits = b + Wx + tf.matmul(U, tf.tanh(MLP5))
-        MLP7_logits = b + Wx + tf.matmul(U, tf.tanh(MLP7))
-        MLP9_logits = b + tf.matmul(U, tf.tanh(MLP8)) # no direct connections
+            with tf.name_scope('MLP_logits'):
+                MLP1_logits = b + Wx + tf.matmul(U, tf.tanh(MLP1))
+                MLP5_logits = b + Wx + tf.matmul(U, tf.tanh(MLP5))
+                MLP7_logits = b + Wx + tf.matmul(U, tf.tanh(MLP7))
+                MLP9_logits = b + tf.matmul(U, tf.tanh(MLP8)) # no direct connections
 
-    MLP1_prob = tf.nn.softmax(logits=MLP1_logits, axis=0)
-    MLP5_prob = tf.nn.softmax(logits=MLP5_logits, axis=0)
-    MLP7_prob = tf.nn.softmax(logits=MLP7_logits, axis=0)
-    MLP9_prob = tf.nn.softmax(logits=MLP9_logits, axis=0)
+            MLP1_prob = tf.nn.softmax(logits=MLP1_logits, axis=0)
+            MLP5_prob = tf.nn.softmax(logits=MLP5_logits, axis=0)
+            MLP7_prob = tf.nn.softmax(logits=MLP7_logits, axis=0)
+            MLP9_prob = tf.nn.softmax(logits=MLP9_logits, axis=0)
 
-    with tf.name_scope('MLP_losses'):
-        MLP1_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y, logits=tf.transpose(MLP1_logits)))
-        MLP5_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y, logits=tf.transpose(MLP5_logits)))
-        MLP7_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y, logits=tf.transpose(MLP7_logits)))
-        MLP9_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y, logits=tf.transpose(MLP9_logits)))
+            with tf.name_scope('MLP_losses'):
+                MLP1_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=tf.transpose(MLP1_logits)))
+                MLP5_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=tf.transpose(MLP5_logits)))
+                MLP7_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=tf.transpose(MLP7_logits)))
+                MLP9_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=tf.transpose(MLP9_logits)))
 
-    tf.summary.scalar('MLP1_loss', MLP1_loss)
-    tf.summary.scalar('MLP5_loss', MLP5_loss)
-    tf.summary.scalar('MLP7_loss', MLP7_loss)
-    tf.summary.scalar('MLP9_loss', MLP9_loss)
+            tf.summary.scalar('MLP1_loss', MLP1_loss)
+            tf.summary.scalar('MLP5_loss', MLP5_loss)
+            tf.summary.scalar('MLP7_loss', MLP7_loss)
+            tf.summary.scalar('MLP9_loss', MLP9_loss)
 
-    with tf.name_scope('optimizers'):
-        Custom_Optimizer = tf.contrib.opt.extend_with_decoupled_weight_decay(tf.train.AdamOptimizer)
-        MLP1_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP1_loss)
-        MLP5_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP5_loss)
-        MLP7_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP7_loss)
-        MLP9_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=epsilon_t).minimize(MLP9_loss)
-    #         optimizer = tf.train.AdamOptimizer(learning_rate=epsilon_t).minimize(loss) # without weight decay
+            with tf.name_scope('optimizers'):
+                Custom_Optimizer = tf.contrib.opt.extend_with_decoupled_weight_decay(tf.train.AdamOptimizer)
+                MLP1_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=self.epsilon_t).minimize(MLP1_loss)
+                MLP5_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=self.epsilon_t).minimize(MLP5_loss)
+                MLP7_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=self.epsilon_t).minimize(MLP7_loss)
+                MLP9_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=self.epsilon_t).minimize(MLP9_loss)
+            #         optimizer = tf.train.AdamOptimizer(learning_rate=epsilon_t).minimize(loss) # without weight decay
 
-    # merge all summaries
-    summary_merged = tf.summary.merge_all()
+            # merge all summaries
+            summary_merged = tf.summary.merge_all()
+
+        version = name[-1]
+        self.fetches = [eval('MLP{}_optimizer'.format(version)),
+                        eval('MLP{}_loss'.format(version)),
+                        eval('MLP{}_prob'.format(version)),
+                        summary_merged]
 
 
 # MLP3_graph = tf.Graph()
@@ -301,12 +321,6 @@ with graph.as_default():
 #     summary_merged = tf.summary.merge_all()
 
 
-## create the directory for TensorBoard variables if there is not
-log_dir = 'MLP1_log'
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
-
-
 epsilon_0 = 10**(-3)
 r = 10**(-8) # decrease factor
 # total number of parameters updates (from W, U, H, d, b, and words vectors from C) per training step
@@ -316,8 +330,15 @@ num_epochs = 20
 num_steps = training_steps
 parameter_updates = 0
 
-# with tf.Session(graph=model.graph) as session:
-with tf.Session(graph=graph) as session:
+# select model
+model = Model(name='MLP1')
+
+# create TensorBoard directory
+log_dir = model.name + 'log'
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+
+with tf.Session(graph=model.graph) as session:
     saver = tf.train.Saver()
     writer = tf.summary.FileWriter(log_dir, session.graph)
 
@@ -331,37 +352,23 @@ with tf.Session(graph=graph) as session:
 
     for epoch in np.arange(num_epochs):
         print('epoch:', epoch + 1)
-        for step in tqdm(np.arange(num_steps)):
+        for step in tqdm_notebook(np.arange(num_steps)):
             data_training, label = next(training_data)
+            feed_dict={model.words:data_training, model.y:label, model.epsilon_t:learning_rate}
 
             # collect runtime statistics
             run_metadata = tf.RunMetadata()
+            _, loss_step, prob_step, summary = session.run(model.fetches, feed_dict=feed_dict, run_metadata=run_metadata)
 
-            _, loss_step, prob_step, summary = session.run([MLP1_optimizer, MLP1_loss, MLP1_prob, summary_merged],
-                                                            feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
-                                                            run_metadata=run_metadata)
-            #
-            # _, loss_step, prob_step, summary = session.run([MLP5_optimizer, MLP5_loss, MLP5_prob, summary_merged],
-            #                                                 feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
-            #                                                 run_metadata=run_metadata)
-
-            # _, loss_step, prob_step, summary = session.run([MLP7_optimizer, MLP7_loss, MLP7_prob, summary_merged],
-            #                                                 feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
-            #                                                 run_metadata=run_metadata)
-
-            # _, loss_step, prob_step, summary = session.run([MLP9_optimizer, MLP9_loss, MLP9_prob, summary_merged],
-            #                                                 feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
-            #                                                 run_metadata=run_metadata)
-
-            # _, loss_step, prob_step, summary = session.run([MLP3_optimizer, MLP3_loss, MLP3_prob, summary_merged],
-            #                                                 feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
-            #                                                 run_metadata=run_metadata)
+#             _, loss_step, prob_step, summary = session.run([MLP3_optimizer, MLP3_loss, MLP3_prob, summary_merged],
+#                                                             feed_dict={words:data_training, y:label, epsilon_t:learning_rate},
+#                                                             run_metadata=run_metadata)
 
             total_steps += 1
             learning_rate = epsilon_0/(1+r*t)
             parameter_updates += t
             total_loss += loss_step
-            perplexity_exponent += np.log(prob_step[np.argmax(label)][0] + r)
+            perplexity_exponent += np.log(prob_step[np.argmax(label)][0])
 
             # record summaries
             writer.add_summary(summary, total_steps)
@@ -373,10 +380,10 @@ with tf.Session(graph=graph) as session:
                 print('perplexity at step', total_steps, ':', np.exp(-perplexity_exponent/total_steps))
 
     # save the model
-    saver.save(session, os.path.join(log_dir, 'MLP1.ckpt'))
+    saver.save(session, os.path.join(log_dir, '{}.ckpt'.format(model.name)))
     writer.close()
 
 # record results
-file = open('MLP1_results.txt', 'w')
+file = open('{}_results.txt'.fromat(model.name), 'w')
 file.write('final perplexity: ' + str(np.exp(-perplexity_exponent/total_steps)))
 file.close()
