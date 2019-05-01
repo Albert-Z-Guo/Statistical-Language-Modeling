@@ -148,10 +148,10 @@ def generator(data, labels, vocab_size, mode=1):
     if mode == 1:
         i = 0
         end = int(len(data)*0.8)
-    elif model == 2:
+    elif mode == 2:
         i = int(len(data)*0.8)
         end = i + int(len(data)*0.1)
-    else:
+    elif mode == 3:
         i = int(len(data)*0.9)
         end = len(data) - 1
 
@@ -434,6 +434,7 @@ with tf.Session(graph=model.graph) as sess:
 
     for batch in tqdm(np.arange(num_batches)):
         data_training, label = next(validation_data)
+        # data_training, label = next(test_data)
         feed_dict={model.words:data_training, model.y:label}
 
         loss_batch, prob_batch = sess.run([model.fetches[1], model.fetches[2]], feed_dict=feed_dict)
