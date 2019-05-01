@@ -460,7 +460,9 @@ def train(model, data, num_batches):
         writer.close()
 
         # record results
-        file = open('{}_traininig.txt'.format(model.name), 'w')
+        if not os.path.exists('results'):
+            os.makedirs('results')
+        file = open('results/{}_traininig.txt'.format(model.name), 'w')
         file.write('final perplexity: ' + str(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
         file.close()
 
@@ -497,7 +499,9 @@ def evaluate(model, evaluation_data, num_batches, validation_flag=1):
             suffix = 'validation'
         else:
             suffix = 'test'
-        file = open('{}_{}.txt'.format(model.name, suffix), 'w')
+        if not os.path.exists('results'):
+            os.makedirs('results')
+        file = open('results/{}_{}.txt'.format(model.name, suffix), 'w')
         file.write('final perplexity: ' + str(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
         file.close()
 
