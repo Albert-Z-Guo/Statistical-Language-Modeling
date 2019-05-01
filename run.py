@@ -393,7 +393,7 @@ def train(model):
 
                 # record summaries
                 writer.add_summary(summary, batches_total)
-                if batch == (num_batches - 1):
+                if batch == (training_batches - 1):
                     writer.add_run_metadata(run_metadata, 'epoch{} batch {}'.format(epoch, batch))
 
                 if batch % 100 == 0 and batch > 0:
@@ -454,8 +454,8 @@ def evaluate(model, evaluation_data, validation_flag=1):
 
 
 if __name__ == '__main__':
-    model = Model(name='MLP1')
-    # model = MLP3()
+    # model = Model(name='MLP1')
+    model = MLP3()
     # model = Model(name='MLP5')
     # model = Model(name='MLP7')
     # model = Model(name='MLP9')
