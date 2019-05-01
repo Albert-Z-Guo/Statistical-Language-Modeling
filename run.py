@@ -179,7 +179,7 @@ class Model:
         if 'MLP1' in name:
             h = 50
             m = 60
-        elif 'MLP5' in name or MLP7' in name:
+        elif 'MLP5' in name or 'MLP7' in name:
             h = 50
             m = 30
         elif 'MLP9' in name:
