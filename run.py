@@ -121,7 +121,7 @@ def preprocess_data_brown(file_path):
         print('\ndata size: {:.3} MB'.format(sys.getsizeof(data) / 1024**2))
         print('labels size: {:.3} MB\n'.format(sys.getsizeof(labels) / 1024**2))
 
-        # reduce memory
+        # save memory
         del sents
         del words_cleansed
         del sents_cleansed
@@ -175,7 +175,7 @@ def preprocess_data_wiki():
             print(mode + 'data size: {:.3} MB'.format(sys.getsizeof(eval('data_{}'.format(mode))) / 1024**2))
             print(mode + 'labels size: {:.3} MB\n'.format(sys.getsizeof(eval('labels_{}'.format(mode))) / 1024**2))
 
-        # reduce memory
+        # save memory
         del sents_training
         del sents_validation
         del sents_test
@@ -454,7 +454,7 @@ def train(model, data, num_batches):
                     print('average loss per word so far: {:.3}'.format(loss_total/batches_total/batch_size))
                     print('average perplexity per word so far: {:.3}'.format(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
 
-        # save the model
+        # save model
         saver.save(sess=session, save_path=os.path.join(log_dir, '{}.ckpt'.format(model.name)))
         writer.close()
 
