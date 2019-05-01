@@ -516,7 +516,6 @@ if __name__ == '__main__':
     inputs = parser.parse_args()
     corpora_option = inputs.corpora_option
     model_choice = inputs.model_choice
-    global num_epochs
     num_epochs = inputs.num_epochs
 
     # use Brown corpora
