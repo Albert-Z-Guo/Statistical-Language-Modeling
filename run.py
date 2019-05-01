@@ -90,7 +90,6 @@ def generate_data(sents_mapped):
 
     return np.array(data), np.array(labels)
 
-
 def preprocess_data_brown(file_path):
     print('preprocessing Brown corpora...')
     try:
@@ -127,7 +126,10 @@ def preprocess_data_brown(file_path):
         del words_cleansed
         del sents_cleansed
 
-        brown_data_dict = {'data': data, 'labels': labels, 'vocab': vocab}
+        brown_data_dict = {'data': data, 'labels': labels, 'vocab': vocab,
+                            'batches': {'training': int(len(data)*0.8) // batch_size + 1,
+                                        'validation': int(len(data)*0.1) // batch_size + 1,
+                                        'test': int(len(data)*0.1) // batch_size + 1}}
 
         # save processed data
         with open('brown_data.pickle', 'wb') as file:
@@ -184,8 +186,12 @@ def preprocess_data_wiki():
         del sents_cleansed_validation
         del sents_cleansed_test
 
+        def num_batches(data):
+            return len(data) // batch_size + 1
+
         wiki_data_dict = {'data': {'training': data_training, 'validation': data_validation, 'test': data_test},
                             'labels': {'training': labels_training, 'validation': labels_validation, 'test': labels_test},
+                            'batches': {'training': num_batches(data_training), 'validation': num_batches(data_validation), 'test': num_batches(data_test)},
                             'vocab': vocab}
 
         # save processed data
@@ -512,13 +518,14 @@ if __name__ == '__main__':
     # use Wiki corpora
     wiki_data_dict = preprocess_data_wiki()
     vocab_len = len(wiki_data_dict['vocab'])
+
     data_training = generator(wiki_data_dict['data']['training'], wiki_data_dict['labels']['training'], vocab_len, mode='all')
     data_validation = generator(wiki_data_dict['data']['validation'], wiki_data_dict['labels']['validation'], vocab_len, mode='all')
-    data_test = generator(wiki_data_dict['data']['training'], wiki_data_dict['labels']['trianing'], vocab_len, mode='all')
+    data_test = generator(wiki_data_dict['data']['test'], wiki_data_dict['labels']['test'], vocab_len, mode='all')
 
-    num_batches_training = len(data_training) // batch_size + 1
-    num_batches_validation = len(data_validation) // batch_size + 1
-    num_batches_test = len(data_test) // batch_size + 1
+    num_batches_training = wiki_data_dict['batches']['training']
+    num_batches_validation = wiki_data_dict['batches']['validation']
+    num_batches_test = wiki_data_dict['batches']['test']
 
     # model = Model(name='Brown_MLP1', V=len(vocab))
     # model = MLP3(name='Brown_MLP3', len(vocab))
