@@ -25,4 +25,4 @@ The following table contains the result using Wiki-text 2 corpus with order of t
 
 | Wiki-text 2 Corpus | n | h   | m  | direct | train | valid | test |
 |--------------|---|-----|----|--------|-------|-------|------|
-| MLP7         | 5 | 50  | 30 | yes    |    |    |   |
+| MLP7         | 5 | 50  | 30 | yes    | 185 |  155  | 137 |
