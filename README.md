@@ -1,7 +1,7 @@
 # Statistical-Language-Modeling
 Deep Learning for Natural Language Processing
 
-This repo contains modern implementation of the classic paper [A Neural Probabilistic Language Model](http://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf) by [Yoshua Bengio](https://en.wikipedia.org/wiki/Yoshua_Bengio) et al. in 2003 using [Tensorflow](https://www.tensorflow.org/).
+This repo contains modern implementation of the classic paper [A Neural Probabilistic Language Model](http://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf) by [Yoshua Bengio](https://en.wikipedia.org/wiki/Yoshua_Bengio) et al. in 2003 using [Tensorflow](https://www.tensorflow.org/). All results were obtained with an NVIDIA's GeForce RTX 2080 Ti Graphics Card.
 
 Because the Brown corpora used has minor discrepancy in word numbers as compared to the Brown corpora used in the paper, the final vocabulary size of the word embedding use is slightly different from the one mentioned in the paper. This implementation also used 80% of data for training, the following 10% for validation, and the rest 10% for testing, instead of the hard number division mentioned in the paper.
 
