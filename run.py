@@ -371,7 +371,7 @@ def train(model, data, num_batches):
 
                 # update learning rate
                 learning_rate = epsilon_0/(1+r*t)
-                # t += t
+                t += 5
 
                 batches_total += 1
                 loss_total += loss_batch
@@ -454,6 +454,6 @@ if __name__ == '__main__':
     model = Model(name='Brown_MLP7', V=len(vocab))
     # model = Model(name='Brown_MLP9', V=len(vocab))
 
-    # train(model, data_training, num_batches_training)
+    train(model, data_training, num_batches_training)
     evaluate(model, data_validation, num_batches_validation, validation_flag=1)
     evaluate(model, data_test, num_batches_test, validation_flag=0)
