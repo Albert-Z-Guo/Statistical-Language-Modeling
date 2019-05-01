@@ -14,6 +14,11 @@ import tensorflow as tf
 from tqdm import tqdm
 
 
+n = 5 # order of the model
+batch_size = 256
+num_epochs = 15
+
+
 def cleanse(sents):
     sents_cleansed = []
     for sent in sents:
@@ -49,9 +54,6 @@ def map_words_sents(words, sents):
     return np.array(sents_mapped), vocab, vocab_reversed
 
 
-n = 5 # order of the model
-
-
 def generate_data(sents_mapped, n):
     data = [] # sets of n-word sequence
     labels = [] # sets of 1-word prediction
@@ -76,65 +78,66 @@ def generate_data(sents_mapped, n):
     return np.array(data), np.array(labels)
 
 
-'''try reading saved data, if no data found, generate data'''
-try:
-    with open('data.pickle', 'rb') as file:
-        data = pickle.load(file)
+def preprocess_data(file_path):
+    '''try reading saved data, if no data found, generate data'''
+    try:
+        with open('data.pickle', 'rb') as file:
+            data = pickle.load(file)
 
-    with open('labels.pickle', 'rb') as file:
-        labels = pickle.load(file)
+        with open('labels.pickle', 'rb') as file:
+            labels = pickle.load(file)
 
-    with open('vocab.pickle', 'rb') as file:
-        vocab = pickle.load(file)
-except:
-    # download corpus
-    # sents = nltk.corpus.brown.sents()
+        with open('vocab.pickle', 'rb') as file:
+            vocab = pickle.load(file)
+    except:
+        # download corpus
+        # sents = nltk.corpus.brown.sents()
 
-    corpora = ''
-    with open('corpora/brown.txt', 'r') as file:
-        for row in file:
-            if row == '\n':
-                corpora += ' '
-            else:
-                corpora += row.replace('\n', '')
+        corpora = ''
+        with open(file_path, 'r') as file:
+            for row in file:
+                if row == '\n':
+                    corpora += ' '
+                else:
+                    corpora += row.replace('\n', '')
 
-    sents = sent_tokenize(corpora)
-    words_cleansed, sents_cleansed = cleanse(sents)
-    sents_mapped, vocab, vocab_reversed = map_words_sents(words_cleansed, sents_cleansed)
+        sents = sent_tokenize(corpora)
+        words_cleansed, sents_cleansed = cleanse(sents)
+        sents_mapped, vocab, vocab_reversed = map_words_sents(words_cleansed, sents_cleansed)
 
-    print('sentence num:', len(sents_cleansed))
-    print('words num:', len(words_cleansed))
-    print('vocab size:', len(vocab))
+        print('sentence num:', len(sents_cleansed))
+        print('words num:', len(words_cleansed))
+        print('vocab size:', len(vocab))
 
-    # reduce memory
-    del sents
+        # reduce memory
+        del sents
 
-    start_time = time.time()
-    data, labels = generate_data(sents_mapped, n)
-    print('\ngenerated data in {:.4} s'.format(time.time()-start_time))
+        start_time = time.time()
+        data, labels = generate_data(sents_mapped, n)
+        print('\ngenerated data in {:.4} s'.format(time.time()-start_time))
 
-    print('\ndata len:', len(data))
-    print('label len:', len(labels))
+        # check data lengths
+        print('\ndata len:', len(data))
+        print('label len:', len(labels))
 
-    # check variable sizes
-    print('data size: {:.3} MB'.format(sys.getsizeof(data) / 1024**2))
-    print('labels size: {:.3} MB'.format(sys.getsizeof(labels) / 1024**2))
+        # check variable sizes
+        print('data size: {:.3} MB'.format(sys.getsizeof(data) / 1024**2))
+        print('labels size: {:.3} MB'.format(sys.getsizeof(labels) / 1024**2))
 
-    # save generated data
-    with open('data.pickle', 'wb') as file:
-        pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
+        # save generated data
+        with open('data.pickle', 'wb') as file:
+            pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open('labels.pickle', 'wb') as file:
-        pickle.dump(labels, file, protocol=pickle.HIGHEST_PROTOCOL)
+        with open('labels.pickle', 'wb') as file:
+            pickle.dump(labels, file, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open('vocab.pickle', 'wb') as file:
-        pickle.dump(vocab, file, protocol=pickle.HIGHEST_PROTOCOL)
+        with open('vocab.pickle', 'wb') as file:
+            pickle.dump(vocab, file, protocol=pickle.HIGHEST_PROTOCOL)
 
-    # reduce memory
-    del sents_mapped
+        # reduce memory
+        del sents_mapped
 
-
-batch_size = 256
+    return data, labels, vocab
 
 
 def generator(data, labels, vocab_size, mode=1):
@@ -165,15 +168,6 @@ def generator(data, labels, vocab_size, mode=1):
                 i += 1
 
         yield np.array(data_batch), np.array(labels_batch)
-
-
-training_data = generator(data, labels, len(vocab), mode=1)
-validation_data = generator(data, labels, len(vocab), mode=2)
-test_data = generator(data, labels, len(vocab), mode=3)
-
-training_batches = int(len(data)*0.8) // batch_size + 1
-validation_batches = int(len(data)*0.1) // batch_size + 1
-test_batches = int(len(data)*0.1) // batch_size + 1
 
 
 class Model:
@@ -341,8 +335,15 @@ class MLP3:
         self.fetches = [MLP3_optimizer, MLP3_loss, MLP3_prob, summary_merged]
 
 
-num_epochs = 15
-num_batches = training_batches
+data, labels, vocab = preprocess_data('corpora/brown.txt')
+
+training_data = generator(data, labels, len(vocab), mode=1)
+validation_data = generator(data, labels, len(vocab), mode=2)
+test_data = generator(data, labels, len(vocab), mode=3)
+
+training_batches = int(len(data)*0.8) // batch_size + 1
+validation_batches = int(len(data)*0.1) // batch_size + 1
+test_batches = int(len(data)*0.1) // batch_size + 1
 
 # select model
 model = Model(name='MLP1')
@@ -351,7 +352,8 @@ model = Model(name='MLP1')
 # model = Model(name='MLP7')
 # model = Model(name='MLP9')
 
-def train(model, training):
+
+def train(model):
     # create TensorBoard directory
     log_dir = model.name + '_log'
     if not os.path.exists(log_dir):
@@ -377,7 +379,7 @@ def train(model, training):
 
         for epoch in tqdm(np.arange(num_epochs)):
             print('epoch:', epoch + 1)
-            for batch in tqdm(np.arange(num_batches)):
+            for batch in tqdm(np.arange(training_batches)):
                 data_training, label = next(training_data)
                 feed_dict={model.words:data_training, model.y:label, model.epsilon_t:learning_rate}
 
@@ -421,7 +423,11 @@ def evaluate(model, evaluation_data, validation_flag=1):
         saver = tf.train.Saver()
         saver.restore(sess=sess, save_path=os.path.join(log_dir, '{}.ckpt'.format(model.name)))
 
-        num_batches = validation_batches
+        if validation_flag:
+            num_batches = validation_batches
+        else:
+            num_batches = test_batches
+
         batches_total = 0
         loss_total = 0
         perplexity_exponent = 0
@@ -454,6 +460,7 @@ def evaluate(model, evaluation_data, validation_flag=1):
         file.close()
 
 
-train(model, training_data)
-evaluate(model, validation_data, validation_flag=1)
-evaluate(model, test_data, validation_flag=0)
+if __name__ == '__main__':
+    train(model)
+    evaluate(model, validation_data, validation_flag=1)
+    evaluate(model, test_data, validation_flag=0)
