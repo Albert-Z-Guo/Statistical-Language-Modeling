@@ -345,7 +345,7 @@ num_epochs = 15
 num_batches = training_batches
 
 # select model
-model = Model(name='MLP9')
+model = Model(name='MLP1')
 # model = MLP3()
 # model = Model(name='MLP5')
 # model = Model(name='MLP7')
@@ -416,42 +416,43 @@ with tf.Session(graph=model.graph) as session:
     file.close()
 
 
-validation_flag = 1
-with tf.Session(graph=model.graph) as sess:
-    saver = tf.train.Saver()
-    saver.restore(sess, save_path=os.path.join(log_dir, '{}.ckpt'.format(model.name)))
+def evaluate(model, evaluation_data, validation_flag=1):
+    with tf.Session(graph=model.graph) as sess:
+        saver = tf.train.Saver()
+        saver.restore(sess, save_path=os.path.join(log_dir, '{}.ckpt'.format(model.name)))
 
-    num_batches = validation_batches
-    batches_total = 0
-    loss_total = 0
-    perplexity_exponent = 0
-    perplexity_exponent_total = 0
+        num_batches = validation_batches
+        batches_total = 0
+        loss_total = 0
+        perplexity_exponent = 0
+        perplexity_exponent_total = 0
 
-    for batch in tqdm(np.arange(num_batches)):
+        for batch in tqdm(np.arange(num_batches)):
+            data_training, label = next(evaluation_data)
+            feed_dict={model.words:data_training, model.y:label}
+
+            loss_batch, prob_batch = sess.run([model.fetches[1], model.fetches[2]], feed_dict=feed_dict)
+
+            batches_total += 1
+            loss_total += loss_batch
+
+            prob_batch = prob_batch.T # [batch_size, vocab_size]
+            perplexity_exponent = np.sum(np.log(prob_batch[np.arange(len(prob_batch)), np.argmax(label, axis=1)]))
+            perplexity_exponent_total += perplexity_exponent
+
+            if batch % 100 == 0 and batch > 0:
+                print('loss at batch', batches_total, ':', loss_batch)
+                print('average loss per word so far: {:.3}'.format(loss_total/batches_total/batch_size))
+                print('average perplexity per word so far: {:.3}'.format(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
+
         if validation_flag:
-            data_training, label = next(validation_data)
+            suffix = 'validation'
         else:
-            data_training, label = next(test_data)
-        feed_dict={model.words:data_training, model.y:label}
+            suffix = 'test'
+        file = open('{}_{}.txt'.format(model.name, suffix), 'w')
+        file.write('final perplexity: ' + str(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
+        file.close()
 
-        loss_batch, prob_batch = sess.run([model.fetches[1], model.fetches[2]], feed_dict=feed_dict)
 
-        batches_total += 1
-        loss_total += loss_batch
-
-        prob_batch = prob_batch.T # [batch_size, vocab_size]
-        perplexity_exponent = np.sum(np.log(prob_batch[np.arange(len(prob_batch)), np.argmax(label, axis=1)]))
-        perplexity_exponent_total += perplexity_exponent
-
-        if batch % 100 == 0 and batch > 0:
-            print('loss at batch', batches_total, ':', loss_batch)
-            print('average loss per word so far: {:.3}'.format(loss_total/batches_total/batch_size))
-            print('average perplexity per word so far: {:.3}'.format(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
-
-    if validation_flag:
-        suffix = 'validation'
-    else:
-        suffix = 'test'
-    file = open('{}_{}.txt'.format(model.name, suffix), 'w')
-    file.write('final perplexity: ' + str(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
-    file.close()
+evaluate(model, validation_data, validation_flag=1)
+evaluate(model, test_data, validation_flag=0)
