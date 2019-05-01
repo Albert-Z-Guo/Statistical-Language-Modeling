@@ -464,12 +464,12 @@ if __name__ == '__main__':
 
     # use Wiki corpora
     wiki_data_training, wiki_labels_training, wiki_vocab_trainng = preprocess_data(file_path='corpora/wiki.train.txt')
-    wiki_data_validation, wiki_labels_validation, wiki_vocab_trainng = preprocess_data(file_path='corpora/wiki.valid.txt')
+    wiki_data_validation, wiki_labels_validation, wiki_vocab_validation = preprocess_data(file_path='corpora/wiki.valid.txt')
     wiki_data_test, wiki_labels_test, wiki_vocab_test = preprocess_data(file_path='corpora/wiki.test.txt')
 
     data_training = generator(wiki_data_training, wiki_labels_training, len(wiki_vocab_trainng), mode='all')
     data_validation = generator(wiki_data_validation, wiki_labels_validation, len(wiki_vocab_trainng), mode='all')
-    data_test = generator(wiki_data_training, wiki_labels_training, len(wiki_vocab_trainng), mode='all')
+    data_test = generator(wiki_data_test, wiki_labels_test, len(wiki_vocab_test), mode='all')
 
     num_batches_training = len(wiki_data_training) // batch_size + 1
     num_batches_validation = len(wiki_data_validation) // batch_size + 1
