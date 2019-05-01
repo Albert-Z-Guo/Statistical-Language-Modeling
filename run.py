@@ -170,6 +170,17 @@ def generator(data, labels, vocab_size, mode=1):
         yield np.array(data_batch), np.array(labels_batch)
 
 
+data, labels, vocab = preprocess_data('corpora/brown.txt')
+
+training_data = generator(data, labels, len(vocab), mode=1)
+validation_data = generator(data, labels, len(vocab), mode=2)
+test_data = generator(data, labels, len(vocab), mode=3)
+
+training_batches = int(len(data)*0.8) // batch_size + 1
+validation_batches = int(len(data)*0.1) // batch_size + 1
+test_batches = int(len(data)*0.1) // batch_size + 1
+
+
 class Model:
     '''
     the following graph contains MLP 1, MLP 5, MLP 7, and MLP 9 loss optimizations
@@ -335,24 +346,6 @@ class MLP3:
         self.fetches = [MLP3_optimizer, MLP3_loss, MLP3_prob, summary_merged]
 
 
-data, labels, vocab = preprocess_data('corpora/brown.txt')
-
-training_data = generator(data, labels, len(vocab), mode=1)
-validation_data = generator(data, labels, len(vocab), mode=2)
-test_data = generator(data, labels, len(vocab), mode=3)
-
-training_batches = int(len(data)*0.8) // batch_size + 1
-validation_batches = int(len(data)*0.1) // batch_size + 1
-test_batches = int(len(data)*0.1) // batch_size + 1
-
-# select model
-model = Model(name='MLP1')
-# model = MLP3()
-# model = Model(name='MLP5')
-# model = Model(name='MLP7')
-# model = Model(name='MLP9')
-
-
 def train(model):
     # create TensorBoard directory
     log_dir = model.name + '_log'
@@ -461,6 +454,12 @@ def evaluate(model, evaluation_data, validation_flag=1):
 
 
 if __name__ == '__main__':
+    model = Model(name='MLP1')
+    # model = MLP3()
+    # model = Model(name='MLP5')
+    # model = Model(name='MLP7')
+    # model = Model(name='MLP9')
+
     train(model)
     evaluate(model, validation_data, validation_flag=1)
     evaluate(model, test_data, validation_flag=0)
