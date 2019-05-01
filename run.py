@@ -362,6 +362,7 @@ log_dir = model.name + '_log'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
+'''
 with tf.Session(graph=model.graph) as session:
     saver = tf.train.Saver()
     writer = tf.summary.FileWriter(log_dir, session.graph)
@@ -419,7 +420,7 @@ with tf.Session(graph=model.graph) as session:
     file = open('{}_traininig.txt'.format(model.name), 'w')
     file.write('final perplexity: ' + str(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
     file.close()
-
+'''
 
 with tf.Session(graph=model.graph) as sess:
     saver = tf.train.Saver()
@@ -437,17 +438,17 @@ with tf.Session(graph=model.graph) as sess:
 
         loss_batch, prob_batch = sess.run([model.fetches[1], model.fetches[2]], feed_dict=feed_dict)
 
-        total_batches += 1
-        total_loss += loss_batch
+        batches_total += 1
+        loss_total += loss_batch
 
         prob_batch = prob_batch.T # [batch_size, vocab_size]
         perplexity_exponent = np.sum(np.log(prob_batch[np.arange(len(prob_batch)), np.argmax(label, axis=1)]))
         perplexity_exponent_total += perplexity_exponent
 
         if batch % 100 == 0 and batch > 0:
-            print('loss at batch', total_batches, ':', loss_batch)
-            print('average loss per word so far:', total_loss/total_batches/batch_size)
-            print('average perplexity per word so far:', np.exp(-perplexity_exponent_total/total_batches/batch_size))
+            print('loss at batch', batches_total, ':', loss_batch)
+            print('average loss per word so far: {:.3}'.format(loss_total/batches_total/batch_size))
+            print('average perplexity per word so far: {:.3}'.format(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
 
     file = open('{}_validation.txt'.format(model.name), 'w')
     file.write('final perplexity: ' + str(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
