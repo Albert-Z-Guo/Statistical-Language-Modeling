@@ -3,6 +3,7 @@ import re
 import sys
 import time
 import pickle
+import argparse
 import collections
 
 import nltk
@@ -462,8 +463,8 @@ def train(model, data, num_batches):
         # record results
         if not os.path.exists('results'):
             os.makedirs('results')
-        file = open('results/{}_traininig.txt'.format(model.name), 'w')
-        file.write('final perplexity: ' + str(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
+        file = open('results/{}.txt'.format(model.name), 'w')
+        file.write('final training perplexity: {}\n'.format(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
         file.close()
 
 
@@ -501,20 +502,25 @@ def evaluate(model, evaluation_data, num_batches, validation_flag=1):
             suffix = 'test'
         if not os.path.exists('results'):
             os.makedirs('results')
-        file = open('results/{}_{}.txt'.format(model.name, suffix), 'w')
-        file.write('final perplexity: ' + str(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
+        file = open('results/{}.txt'.format(model.name), 'w')
+        file.write('final {} perplexity: {}\n'.format(suffix, np.exp(-perplexity_exponent_total/batches_total/batch_size)))
         file.close()
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='command line options; default to evaluate MLP1 on Brown corpus')
+    parser.add_argument('--corpora', action="store", dest="corpora_option", default='brown', help="data to use: either 'brown' or 'wiki'")
+    parser.add_argument('--model', action="store", dest="model_choice", default='1', help="MLP models to choose from: '1', '3', '5', '7', or '9'")
+    parser.add_argument('--train', action="store_true", dest="training", default=False, help='option to train and generate new checkpoints')
+    parser.add_argument('--epoch', action="store", dest="num_epochs", default=15, help='integer number of epochs used for training')
+    inputs = parser.parse_args()
+    corpora_option = inputs.corpora_option
+    model_choice = inputs.model_choice
     global num_epochs
-    num_epochs = 15
-    
-    option = 'brown'
-    model_choice = '3'
+    num_epochs = inputs.num_epochs
 
     # use Brown corpora
-    if option == 'brown':
+    if corpora_option == 'brown':
         brown_data_dict = preprocess_data_brown('corpora/brown.txt')
         vocab_len = len(brown_data_dict['vocab'])
 
@@ -539,7 +545,7 @@ if __name__ == '__main__':
         print('running MLP{} model on Brown corpora...'.format(model_choice))
 
     # use Wiki corpora
-    if option == 'wiki':
+    if corpora_option == 'wiki':
         wiki_data_dict = preprocess_data_wiki()
         vocab_len = len(wiki_data_dict['vocab'])
 
@@ -555,6 +561,7 @@ if __name__ == '__main__':
         print('running MLP7 model on Wikitext-2 corpora...')
 
     # train, validate, and test
-    train(model, data_training, num_batches_training)
+    if inputs.training:
+        train(model, data_training, num_batches_training)
     evaluate(model, data_validation, num_batches_validation, validation_flag=1)
     evaluate(model, data_test, num_batches_test, validation_flag=0)

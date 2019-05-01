@@ -13,7 +13,7 @@ The following table contains the result using Brown corpus with order of the mod
 
 Note that due to initialization of truncated normal variables, the reproduced results may be slightly different.
 
-| Brown Corpus | n | h   | m  | direct | train | valid | test |
+| Brown Corpora | n | h   | m  | direct | train | valid | test |
 |--------------|---|-----|----|--------|-------|-------|------|
 | MLP1         | 5 | 50  | 60 | yes    | 136   | 346   | 349  |
 | MLP3         | 5 | 0   | 60 | yes    | 115   | 451   | 448  |
@@ -23,6 +23,6 @@ Note that due to initialization of truncated normal variables, the reproduced re
 
 The following table contains the result using Wiki-text 2 corpus with order of the model `n` = 5, `batch_size` = 256, and `epoch` = 15.
 
-| Wiki-text 2 Corpus | n | h   | m  | direct | train | valid | test |
+| Wiki-text 2 Corpora | n | h   | m  | direct | train | valid | test |
 |--------------|---|-----|----|--------|-------|-------|------|
 | MLP7         | 5 | 50  | 30 | yes    | 185 |  155  | 137 |
