@@ -17,7 +17,7 @@ Note that due to initialization of truncated normal variables, the reproduced re
 |--------------|---|-----|----|--------|-------|-------|------|
 | MLP1         | 5 | 50  | 60 | yes    | 136   | 346   | 349  |
 | MLP3         | 5 | 0   | 60 | yes    | 115   | 451   | 448  |
-| MLP5         | 5 | 50  | 30 | yes    | 205   | 489   | 448  |
+| MLP5         | 5 | 50  | 30 | yes    | 205   | 489   | 320  |
 | MLP7         | 5 | 50  | 30 | yes    | 191   | 321   | 321  |
 | MLP9         | 5 | 100 | 30 | no     | 287   | 330   |      |
 
