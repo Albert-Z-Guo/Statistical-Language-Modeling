@@ -176,13 +176,13 @@ class Model:
     e.g. MLP 1 model: y = b + Wx + Utanh(d + Hx) where MLP 1 is d + Hx
     '''
     def __init__(self, name, V, batch_size=batch_size, weight_decay=10**(-4)):
-        if name == 'MLP1':
+        if 'MLP1' in name:
             h = 50
             m = 60
-        elif name == 'MLP5' or name == 'MLP7':
+        elif 'MLP5' in name or MLP7' in name:
             h = 50
             m = 30
-        elif name == 'MLP9':
+        elif 'MLP9' in name:
             h = 100
             m = 30
 
