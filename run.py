@@ -6,8 +6,8 @@ import pickle
 import collections
 
 import nltk
-from nltk.tokenize import sent_tokenize
 nltk.download('punkt')
+from nltk.tokenize import sent_tokenize
 # nltk.download('brown') # reference: http://www.nltk.org/nltk_data/
 import numpy as np
 import tensorflow as tf
@@ -83,7 +83,12 @@ def preprocess_data(file_path):
     if 'brown' in file_path:
         prefix = 'brown_'
     else:
-        prefix = 'wiki_'
+        if 'train' in file_path:
+            prefix = 'wiki_train_'
+        elif 'valid' in file_path:
+            prefix = 'wiki_valid_'
+        elif 'test' in file_path:
+            prefix = 'wiki_test_'
 
     try:
         with open(prefix + 'data.pickle', 'rb') as file:
@@ -110,7 +115,7 @@ def preprocess_data(file_path):
         words_cleansed, sents_cleansed = cleanse(sents)
         sents_mapped, vocab, vocab_reversed = map_words_sents(words_cleansed, sents_cleansed)
 
-        print('sentence num:', len(sents_cleansed))
+        print('\nsentence num:', len(sents_cleansed))
         print('words num:', len(words_cleansed))
         print('vocab size:', len(vocab))
 
@@ -127,7 +132,7 @@ def preprocess_data(file_path):
 
         # check variable sizes
         print('data size: {:.3} MB'.format(sys.getsizeof(data) / 1024**2))
-        print('labels size: {:.3} MB'.format(sys.getsizeof(labels) / 1024**2))
+        print('labels size: {:.3} MB\n'.format(sys.getsizeof(labels) / 1024**2))
 
         # save generated data
         with open(prefix + 'data.pickle', 'wb') as file:
