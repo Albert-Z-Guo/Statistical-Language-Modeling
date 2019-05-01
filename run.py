@@ -527,13 +527,13 @@ if __name__ == '__main__':
     num_batches_validation = wiki_data_dict['batches']['validation']
     num_batches_test = wiki_data_dict['batches']['test']
 
-    # model = Model(name='Brown_MLP1', V=len(vocab))
-    # model = MLP3(name='Brown_MLP3', len(vocab))
-    # model = Model(name='Brown_MLP5', V=len(vocab))
-    model = Model(name='Brown_MLP7', V=vocab_len)
-    # model = Model(name='Brown_MLP9', V=len(vocab))
+    # model = Model(name='Brown_MLP1', V=vocab_len)
+    # model = MLP3(name='Brown_MLP3', V=vocab_len)
+    # model = Model(name='Brown_MLP5', V=vocab_len)
+    # model = Model(name='Brown_MLP7', V=vocab_len)
+    # model = Model(name='Brown_MLP9', V=vocab_len)
 
-    # model = Model(name='Wiki_MLP7', V=len(wiki_vocab_trainng))
+    model = Model(name='Wiki_MLP7', V=vocab_len)
 
     # train(model, data_training, num_batches_training)
     evaluate(model, data_validation, num_batches_validation, validation_flag=1)
