@@ -140,15 +140,18 @@ def preprocess_data(file_path):
     return data, labels, vocab
 
 
-def generator(data, labels, vocab_size, mode=1):
+def generator(data, labels, vocab_size, mode='all'):
     # mode = 1 for training, 2 for validation, 3 for testing
-    if mode == 1:
+    if mode == 'all':
+        i = 0
+        end = len(data) - 1
+    elif mode == 'training':
         i = 0
         end = int(len(data)*0.8)
-    elif mode == 2:
+    elif mode == 'validation':
         i = int(len(data)*0.8)
         end = i + int(len(data)*0.1)
-    elif mode == 3:
+    elif mode == 'test':
         i = int(len(data)*0.9)
         end = len(data) - 1
 
@@ -162,7 +165,7 @@ def generator(data, labels, vocab_size, mode=1):
 
             data_batch.append(data[i])
             labels_batch.append(label_one_hot_encoded)
-            if i == end:
+            if i == end - (n-1):
                 i = 0
             else:
                 i += 1
@@ -438,21 +441,33 @@ def evaluate(model, evaluation_data, num_batches, validation_flag=1):
 
 
 if __name__ == '__main__':
+    # use Brown corpora
     data, labels, vocab = preprocess_data(file_path='corpora/brown.txt')
 
-    data_training = generator(data, labels, len(vocab), mode=1)
-    data_validation = generator(data, labels, len(vocab), mode=2)
-    data_test = generator(data, labels, len(vocab), mode=3)
+    data_training = generator(data, labels, len(vocab), mode='training')
+    data_validation = generator(data, labels, len(vocab), mode='validation')
+    data_test = generator(data, labels, len(vocab), mode='test')
 
     num_batches_training = int(len(data)*0.8) // batch_size + 1
     num_batches_validation = int(len(data)*0.1) // batch_size + 1
     num_batches_test = int(len(data)*0.1) // batch_size + 1
+
+    # use Wiki corpora
+    # wiki_data_training, wiki_labels_training, wiki_vocab_trainng = preprocess_data(file_path='corpora/wiki.train.txt')
+    # wiki_data_validation, wiki_labels_validation, wiki_vocab_trainng = preprocess_data(file_path='corpora/wiki.valid.txt')
+    # wiki_data_training, wiki_labels_training, wiki_vocab_trainng = preprocess_data(file_path='corpora/wiki.test.txt')
+    #
+    # data_training = generator(wiki_data_training, wiki_labels_training, len(wiki_vocab_trainng), mode='all')
+    # data_validation = generator(wiki_data_validation, wiki_labels_validation, len(wiki_vocab_trainng), mode='all')
+    # data_test = generator(wiki_data_training, wiki_labels_training, len(wiki_vocab_trainng), mode='all')
 
     # model = Model(name='Brown_MLP1', V=len(vocab))
     # model = MLP3(name='Brown_MLP3', len(vocab))
     # model = Model(name='Brown_MLP5', V=len(vocab))
     model = Model(name='Brown_MLP7', V=len(vocab))
     # model = Model(name='Brown_MLP9', V=len(vocab))
+
+    # model = Model(name='Wiki_MLP7', V=len(vocab))
 
     train(model, data_training, num_batches_training)
     evaluate(model, data_validation, num_batches_validation, validation_flag=1)
