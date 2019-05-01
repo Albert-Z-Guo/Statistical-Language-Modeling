@@ -80,14 +80,19 @@ def generate_data(sents_mapped, n):
 
 def preprocess_data(file_path):
     '''try reading saved data, if no data found, generate data'''
+    if 'brown' in file_path:
+        prefix = 'brown_'
+    else:
+        prefix = 'wiki_'
+
     try:
-        with open('data.pickle', 'rb') as file:
+        with open(prefix + 'data.pickle', 'rb') as file:
             data = pickle.load(file)
 
-        with open('labels.pickle', 'rb') as file:
+        with open(prefix + 'labels.pickle', 'rb') as file:
             labels = pickle.load(file)
 
-        with open('vocab.pickle', 'rb') as file:
+        with open(prefix + 'vocab.pickle', 'rb') as file:
             vocab = pickle.load(file)
     except:
         # download corpus
@@ -125,13 +130,13 @@ def preprocess_data(file_path):
         print('labels size: {:.3} MB'.format(sys.getsizeof(labels) / 1024**2))
 
         # save generated data
-        with open('data.pickle', 'wb') as file:
+        with open(prefix + 'data.pickle', 'wb') as file:
             pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
 
-        with open('labels.pickle', 'wb') as file:
+        with open(prefix + 'labels.pickle', 'wb') as file:
             pickle.dump(labels, file, protocol=pickle.HIGHEST_PROTOCOL)
 
-        with open('vocab.pickle', 'wb') as file:
+        with open(prefix + 'vocab.pickle', 'wb') as file:
             pickle.dump(vocab, file, protocol=pickle.HIGHEST_PROTOCOL)
 
         # reduce memory
@@ -460,6 +465,10 @@ if __name__ == '__main__':
     data_training = generator(wiki_data_training, wiki_labels_training, len(wiki_vocab_trainng), mode='all')
     data_validation = generator(wiki_data_validation, wiki_labels_validation, len(wiki_vocab_trainng), mode='all')
     data_test = generator(wiki_data_training, wiki_labels_training, len(wiki_vocab_trainng), mode='all')
+
+    num_batches_training = len(wiki_data_training) // batch_size + 1
+    num_batches_validation = len(wiki_data_validation) // batch_size + 1
+    num_batches_test = len(wiki_data_test) // batch_size + 1
 
     # model = Model(name='Brown_MLP1', V=len(vocab))
     # model = MLP3(name='Brown_MLP3', len(vocab))
