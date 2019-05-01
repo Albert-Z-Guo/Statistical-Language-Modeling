@@ -19,6 +19,17 @@ batch_size = 256
 num_epochs = 15
 
 
+def cleanse_corpora(file_path):
+    corpora = ''
+    with open(file_path, 'r') as file:
+        for row in file:
+            if row == '\n':
+                corpora += ' '
+            else:
+                corpora += row.replace('\n', '')
+    return corpora
+
+
 def cleanse(sents):
     sents_cleansed = []
     for sent in sents:
@@ -35,8 +46,15 @@ def cleanse(sents):
     return words_cleansed, sents_cleansed
 
 
-def map_words_sents(words, sents):
-    # select vocabulary, all punctuations included
+def map_words_sents(vocab, sents):
+    # map word to index number
+    sents_mapped = []
+    for sent in sents:
+        sents_mapped.append([vocab.get(word, 0) for word in sent])
+    return np.array(sents_mapped)
+
+
+def select_vocab(words):
     vocab = {}
     vocab['UNK'] = 0
     word_count_sorted = sorted(collections.Counter(words).items(), key=lambda item: item[1])
@@ -46,15 +64,10 @@ def map_words_sents(words, sents):
         else:
             vocab['UNK'] += 1
     vocab_reversed = dict(zip(vocab.values(), vocab.keys()))
-
-    # map word to index number
-    sents_mapped = []
-    for sent in sents:
-        sents_mapped.append([vocab.get(word, 0) for word in sent])
-    return np.array(sents_mapped), vocab, vocab_reversed
+    return vocab, vocab_reversed
 
 
-def generate_data(sents_mapped, n):
+def generate_data(sents_mapped):
     data = [] # sets of n-word sequence
     labels = [] # sets of 1-word prediction
 
@@ -78,76 +91,108 @@ def generate_data(sents_mapped, n):
     return np.array(data), np.array(labels)
 
 
-def preprocess_data(file_path):
-    '''try reading saved data, if no data found, generate data'''
-    if 'brown' in file_path:
-        prefix = 'brown_'
-    else:
-        if 'train' in file_path:
-            prefix = 'wiki_train_'
-        elif 'valid' in file_path:
-            prefix = 'wiki_valid_'
-        elif 'test' in file_path:
-            prefix = 'wiki_test_'
-
+def preprocess_data_brown(file_path):
+    print('preprocessing Brown corpora...')
     try:
-        with open(prefix + 'data.pickle', 'rb') as file:
-            data = pickle.load(file)
-
-        with open(prefix + 'labels.pickle', 'rb') as file:
-            labels = pickle.load(file)
-
-        with open(prefix + 'vocab.pickle', 'rb') as file:
-            vocab = pickle.load(file)
+        with open('brown_data.pickle', 'rb') as file:
+            brown_data_dict = pickle.load(file)
+        print('saved data loaded')
     except:
-        # download corpus
+        sents = sent_tokenize(cleanse_corpora(file_path))
+        # use data from NLTK directly
         # sents = nltk.corpus.brown.sents()
 
-        corpora = ''
-        with open(file_path, 'r') as file:
-            for row in file:
-                if row == '\n':
-                    corpora += ' '
-                else:
-                    corpora += row.replace('\n', '')
-
-        sents = sent_tokenize(corpora)
         words_cleansed, sents_cleansed = cleanse(sents)
-        sents_mapped, vocab, vocab_reversed = map_words_sents(words_cleansed, sents_cleansed)
+        vocab, vocab_reversed = select_vocab(words_cleansed)
 
+        start_time = time.time()
+        data, labels = generate_data(map_words_sents(vocab, sents_cleansed))
+        print('\ngenerated data in {:.4} s'.format(time.time()-start_time))
+
+        # check vocab sizes
         print('\nsentence num:', len(sents_cleansed))
         print('words num:', len(words_cleansed))
         print('vocab size:', len(vocab))
-
-        # reduce memory
-        del sents
-
-        start_time = time.time()
-        data, labels = generate_data(sents_mapped, n)
-        print('\ngenerated data in {:.4} s'.format(time.time()-start_time))
 
         # check data lengths
         print('\ndata len:', len(data))
         print('label len:', len(labels))
 
         # check variable sizes
-        print('data size: {:.3} MB'.format(sys.getsizeof(data) / 1024**2))
+        print('\ndata size: {:.3} MB'.format(sys.getsizeof(data) / 1024**2))
         print('labels size: {:.3} MB\n'.format(sys.getsizeof(labels) / 1024**2))
 
-        # save generated data
-        with open(prefix + 'data.pickle', 'wb') as file:
-            pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
+        # reduce memory
+        del sents
+        del words_cleansed
+        del sents_cleansed
 
-        with open(prefix + 'labels.pickle', 'wb') as file:
-            pickle.dump(labels, file, protocol=pickle.HIGHEST_PROTOCOL)
+        brown_data_dict = {'data': data, 'labels': labels, 'vocab': vocab}
 
-        with open(prefix + 'vocab.pickle', 'wb') as file:
-            pickle.dump(vocab, file, protocol=pickle.HIGHEST_PROTOCOL)
+        # save processed data
+        with open('brown_data.pickle', 'wb') as file:
+            pickle.dump(brown_data_dict, file, protocol=pickle.HIGHEST_PROTOCOL)
+
+    return brown_data_dict
+
+
+def preprocess_data_wiki():
+    print('preprocessing Wikitext-2 corpora...')
+    try:
+        with open('wiki_data.pickle', 'rb') as file:
+            wiki_data_dict = pickle.load(file)
+        print('saved data loaded')
+    except:
+        start_time = time.time()
+        sents_training = sent_tokenize(cleanse_corpora('corpora/wiki.train.txt'))
+        words_cleansed_training, sents_cleansed_training = cleanse(sents_training)
+        # use vocab selected from training data throughout
+        vocab, vocab_reversed = select_vocab(words_cleansed_training)
+        data_training, labels_training = generate_data(map_words_sents(vocab, sents_cleansed_training))
+
+        sents_validation = sent_tokenize(cleanse_corpora('corpora/wiki.valid.txt'))
+        words_cleansed_validation, sents_cleansed_validation = cleanse(sents_validation)
+        data_validation, labels_validation = generate_data(map_words_sents(vocab, sents_cleansed_validation))
+
+        sents_test = sent_tokenize(cleanse_corpora('corpora/wiki.test.txt'))
+        words_cleansed_test, sents_cleansed_test = cleanse(sents_test)
+        data_test, labels_test = generate_data(map_words_sents(vocab, sents_cleansed_test))
+        print('\ngenerated training data in {:.4} s\n'.format(time.time()-start_time))
+
+        print('vocab size:', len(vocab))
+        for mode in ['training ', 'validation ', 'test ']:
+            # check vocab sizes
+            print(mode + 'sentence num:', len(eval('sents_cleansed_{}'.format(mode))))
+            print(mode + 'words num:', len(eval('words_cleansed_{}'.format(mode))))
+
+            # check data lengths
+            print(mode + 'data len:', len(eval('data_{}'.format(mode))))
+            print(mode + 'label len:', len(eval('labels_{}'.format(mode))))
+
+            # check variable sizes
+            print(mode + 'data size: {:.3} MB'.format(sys.getsizeof(eval('data_{}'.format(mode))) / 1024**2))
+            print(mode + 'labels size: {:.3} MB\n'.format(sys.getsizeof(eval('labels_{}'.format(mode))) / 1024**2))
 
         # reduce memory
-        del sents_mapped
+        del sents_training
+        del sents_validation
+        del sents_test
+        del words_cleansed_training
+        del words_cleansed_validation
+        del words_cleansed_test
+        del sents_cleansed_training
+        del sents_cleansed_validation
+        del sents_cleansed_test
 
-    return data, labels, vocab
+        wiki_data_dict = {'data': {'training': data_training, 'validation': data_validation, 'test': data_test},
+                            'labels': {'training': labels_training, 'validation': labels_validation, 'test': labels_test},
+                            'vocab': vocab}
+
+        # save processed data
+        with open('wiki_data.pickle', 'wb') as file:
+            pickle.dump(wiki_data_dict, file, protocol=pickle.HIGHEST_PROTOCOL)
+
+    return wiki_data_dict
 
 
 def generator(data, labels, vocab_size, mode='all'):
@@ -424,8 +469,8 @@ def evaluate(model, evaluation_data, num_batches, validation_flag=1):
         perplexity_exponent_total = 0
 
         for batch in tqdm(np.arange(num_batches)):
-            data_training, label = next(evaluation_data)
-            feed_dict={model.words:data_training, model.y:label}
+            data_evaluating, label = next(evaluation_data)
+            feed_dict={model.words:data_evaluating, model.y:label}
 
             loss_batch, prob_batch = sess.run([model.fetches[1], model.fetches[2]], feed_dict=feed_dict)
 
@@ -453,7 +498,9 @@ def evaluate(model, evaluation_data, num_batches, validation_flag=1):
 if __name__ == '__main__':
     # use Brown corpora
     # data, labels, vocab = preprocess_data(file_path='corpora/brown.txt')
-    #
+
+    # brown_data_dict = preprocess_data_brown('corpora/brown.txt')
+
     # data_training = generator(data, labels, len(vocab), mode='training')
     # data_validation = generator(data, labels, len(vocab), mode='validation')
     # data_test = generator(data, labels, len(vocab), mode='test')
@@ -463,26 +510,24 @@ if __name__ == '__main__':
     # num_batches_test = int(len(data)*0.1) // batch_size + 1
 
     # use Wiki corpora
-    wiki_data_training, wiki_labels_training, wiki_vocab_trainng = preprocess_data(file_path='corpora/wiki.train.txt')
-    wiki_data_validation, wiki_labels_validation, wiki_vocab_validation = preprocess_data(file_path='corpora/wiki.valid.txt')
-    wiki_data_test, wiki_labels_test, wiki_vocab_test = preprocess_data(file_path='corpora/wiki.test.txt')
+    wiki_data_dict = preprocess_data_wiki()
+    vocab_len = len(wiki_data_dict['vocab'])
+    data_training = generator(wiki_data_dict['data']['training'], wiki_data_dict['labels']['training'], vocab_len, mode='all')
+    data_validation = generator(wiki_data_dict['data']['validation'], wiki_data_dict['labels']['validation'], vocab_len, mode='all')
+    data_test = generator(wiki_data_dict['data']['training'], wiki_data_dict['labels']['trianing'], vocab_len, mode='all')
 
-    data_training = generator(wiki_data_training, wiki_labels_training, len(wiki_vocab_trainng), mode='all')
-    data_validation = generator(wiki_data_validation, wiki_labels_validation, len(wiki_vocab_trainng), mode='all')
-    data_test = generator(wiki_data_test, wiki_labels_test, len(wiki_vocab_test), mode='all')
-
-    num_batches_training = len(wiki_data_training) // batch_size + 1
-    num_batches_validation = len(wiki_data_validation) // batch_size + 1
-    num_batches_test = len(wiki_data_test) // batch_size + 1
+    num_batches_training = len(data_training) // batch_size + 1
+    num_batches_validation = len(data_validation) // batch_size + 1
+    num_batches_test = len(data_test) // batch_size + 1
 
     # model = Model(name='Brown_MLP1', V=len(vocab))
     # model = MLP3(name='Brown_MLP3', len(vocab))
     # model = Model(name='Brown_MLP5', V=len(vocab))
-    # model = Model(name='Brown_MLP7', V=len(vocab))
+    model = Model(name='Brown_MLP7', V=len(vocab))
     # model = Model(name='Brown_MLP9', V=len(vocab))
 
-    model = Model(name='Wiki_MLP7', V=len(wiki_vocab_trainng))
+    # model = Model(name='Wiki_MLP7', V=len(wiki_vocab_trainng))
 
-    train(model, data_training, num_batches_training)
+    # train(model, data_training, num_batches_training)
     evaluate(model, data_validation, num_batches_validation, validation_flag=1)
     evaluate(model, data_test, num_batches_test, validation_flag=0)
