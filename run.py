@@ -11,23 +11,17 @@ nltk.download('punkt')
 # nltk.download('brown') # reference: http://www.nltk.org/nltk_data/
 import numpy as np
 import tensorflow as tf
-from tqdm import tqdm_notebook
 from tqdm import tqdm
-
-
-def _contains_letter(string):
-    if re.search(re.compile(r'\w'), string): # if string contains an alphanumeric character
-        return True
-    return False
 
 
 def cleanse(sents):
     sents_cleansed = []
     for sent in sents:
-        sent_cleansed = [word for word in sent.split() if _contains_letter(word)] # filter out punctuations
+        sent_cleansed = re.findall(r"[\w'-]+|[^\w ]+", sent)
         if len(sent_cleansed) > 0: # filter out empty lists
-#             sent_cleansed[0] = sent_cleansed[0].lower() # lower the first letter in a sentence
             sents_cleansed.append(sent_cleansed)
+        else:
+            print('abc')
 
     words_cleansed = []
     for sent in sents_cleansed:
