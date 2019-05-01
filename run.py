@@ -530,7 +530,7 @@ if __name__ == '__main__':
     # model = Model(name='Brown_MLP1', V=len(vocab))
     # model = MLP3(name='Brown_MLP3', len(vocab))
     # model = Model(name='Brown_MLP5', V=len(vocab))
-    model = Model(name='Brown_MLP7', V=len(vocab))
+    model = Model(name='Brown_MLP7', V=vocab_len)
     # model = Model(name='Brown_MLP9', V=len(vocab))
 
     # model = Model(name='Wiki_MLP7', V=len(wiki_vocab_trainng))
