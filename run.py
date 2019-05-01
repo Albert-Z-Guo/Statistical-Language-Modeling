@@ -175,7 +175,7 @@ class Model:
     the following graph contains MLP 1, MLP 5, MLP 7, and MLP 9 loss optimizations
     e.g. MLP 1 model: y = b + Wx + Utanh(d + Hx) where MLP 1 is d + Hx
     '''
-    def __init__(self, name, V=len(vocab), batch_size=batch_size, weight_decay=10**(-4)):
+    def __init__(self, name, V, batch_size=batch_size, weight_decay=10**(-4)):
         if name == 'MLP1':
             h = 50
             m = 60
@@ -280,7 +280,7 @@ class MLP3:
     # the following graph contains MLP 3 with h = 0 only
     # MLP 3 model: y = b3 + Wx + M3(b2 + M1tanh(b1 + Wx))
     '''
-    def __init__(self, V=len(vocab), batch_size=batch_size, weight_decay=10**(-4)):
+    def __init__(self, V, batch_size=batch_size, weight_decay=10**(-4)):
         m = 60
 
         self.name = 'MLP3'
@@ -448,11 +448,11 @@ if __name__ == '__main__':
     num_batches_validation = int(len(data)*0.1) // batch_size + 1
     num_batches_test = int(len(data)*0.1) // batch_size + 1
 
-    # model = Model(name='MLP1')
-    model = MLP3()
-    # model = Model(name='MLP5')
-    # model = Model(name='MLP7')
-    # model = Model(name='MLP9')
+    # model = Model(name='MLP1', V=len(vocab))
+    model = MLP3(len(vocab))
+    # model = Model(name='MLP5', V=len(vocab))
+    # model = Model(name='MLP7', V=len(vocab))
+    # model = Model(name='MLP9', V=len(vocab))
 
     # train(model, data_training, num_batches_training)
     evaluate(model, data_validation, num_batches_validation, validation_flag=1)
