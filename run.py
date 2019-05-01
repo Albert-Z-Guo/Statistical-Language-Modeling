@@ -351,75 +351,75 @@ model = Model(name='MLP1')
 # model = Model(name='MLP7')
 # model = Model(name='MLP9')
 
-# create TensorBoard directory
-log_dir = model.name + '_log'
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
+def train(model, training):
+    # create TensorBoard directory
+    log_dir = model.name + '_log'
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
 
+    with tf.Session(graph=model.graph) as session:
+        saver = tf.train.Saver()
+        writer = tf.summary.FileWriter(log_dir, session.graph)
 
-with tf.Session(graph=model.graph) as session:
-    saver = tf.train.Saver()
-    writer = tf.summary.FileWriter(log_dir, session.graph)
+        # initialize variables
+        tf.global_variables_initializer().run()
 
-    # initialize variables
-    tf.global_variables_initializer().run()
+        epsilon_0 = 10**(-3)
+        r = 10**(-8) # decrease factor
+        # number of parameters updates (from W, U, H, d, b, and words vectors from C) per training step
+        t = model.V*(n-1)*model.m +  model.V*model.h + model.h*(n-1)*model.m + model.h + model.V + model.m*(n-1)
 
-    epsilon_0 = 10**(-3)
-    r = 10**(-8) # decrease factor
-    # number of parameters updates (from W, U, H, d, b, and words vectors from C) per training step
-    t = model.V*(n-1)*model.m +  model.V*model.h + model.h*(n-1)*model.m + model.h + model.V + model.m*(n-1)
+        learning_rate = epsilon_0
+        batches_total = 0
+        loss_total = 0
+        perplexity_exponent = 0
+        perplexity_exponent_total = 0
 
-    learning_rate = epsilon_0
-    batches_total = 0
-    loss_total = 0
-    perplexity_exponent = 0
-    perplexity_exponent_total = 0
+        for epoch in tqdm(np.arange(num_epochs)):
+            print('epoch:', epoch + 1)
+            for batch in tqdm(np.arange(num_batches)):
+                data_training, label = next(training_data)
+                feed_dict={model.words:data_training, model.y:label, model.epsilon_t:learning_rate}
 
-    for epoch in tqdm(np.arange(num_epochs)):
-        print('epoch:', epoch + 1)
-        for batch in tqdm(np.arange(num_batches)):
-            data_training, label = next(training_data)
-            feed_dict={model.words:data_training, model.y:label, model.epsilon_t:learning_rate}
+                # collect runtime statistics
+                run_metadata = tf.RunMetadata()
+                _, loss_batch, prob_batch, summary = session.run(model.fetches, feed_dict=feed_dict, run_metadata=run_metadata)
 
-            # collect runtime statistics
-            run_metadata = tf.RunMetadata()
-            _, loss_batch, prob_batch, summary = session.run(model.fetches, feed_dict=feed_dict, run_metadata=run_metadata)
+                # update learning rate
+                learning_rate = epsilon_0/(1+r*t)
+                # t += t
 
-            # update learning rate
-            learning_rate = epsilon_0/(1+r*t)
-            # t += t
+                batches_total += 1
+                loss_total += loss_batch
 
-            batches_total += 1
-            loss_total += loss_batch
+                prob_batch = prob_batch.T # [batch_size, vocab_size]
+                perplexity_exponent = np.sum(np.log(prob_batch[np.arange(len(prob_batch)), np.argmax(label, axis=1)]))
+                perplexity_exponent_total += perplexity_exponent
 
-            prob_batch = prob_batch.T # [batch_size, vocab_size]
-            perplexity_exponent = np.sum(np.log(prob_batch[np.arange(len(prob_batch)), np.argmax(label, axis=1)]))
-            perplexity_exponent_total += perplexity_exponent
+                # record summaries
+                writer.add_summary(summary, batches_total)
+                if batch == (num_batches - 1):
+                    writer.add_run_metadata(run_metadata, 'epoch{} batch {}'.format(epoch, batch))
 
-            # record summaries
-            writer.add_summary(summary, batches_total)
-            if batch == (num_batches - 1):
-                writer.add_run_metadata(run_metadata, 'epoch{} batch {}'.format(epoch, batch))
+                if batch % 100 == 0 and batch > 0:
+                    print('loss at batch', batches_total, ':', loss_batch)
+                    print('average loss per word so far: {:.3}'.format(loss_total/batches_total/batch_size))
+                    print('average perplexity per word so far: {:.3}'.format(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
 
-            if batch % 100 == 0 and batch > 0:
-                print('loss at batch', batches_total, ':', loss_batch)
-                print('average loss per word so far: {:.3}'.format(loss_total/batches_total/batch_size))
-                print('average perplexity per word so far: {:.3}'.format(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
+        # save the model
+        saver.save(sess=session, save_path=os.path.join(log_dir, '{}.ckpt'.format(model.name)))
+        writer.close()
 
-    # save the model
-    saver.save(sess=session, save_path=os.path.join(log_dir, '{}.ckpt'.format(model.name)))
-    writer.close()
-
-    # record results
-    file = open('{}_traininig.txt'.format(model.name), 'w')
-    file.write('final perplexity: ' + str(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
-    file.close()
+        # record results
+        file = open('{}_traininig.txt'.format(model.name), 'w')
+        file.write('final perplexity: ' + str(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
+        file.close()
 
 
 def evaluate(model, evaluation_data, validation_flag=1):
     with tf.Session(graph=model.graph) as sess:
         saver = tf.train.Saver()
-        saver.restore(sess, save_path=os.path.join(log_dir, '{}.ckpt'.format(model.name)))
+        saver.restore(sess=sess, save_path=os.path.join(log_dir, '{}.ckpt'.format(model.name)))
 
         num_batches = validation_batches
         batches_total = 0
@@ -454,5 +454,6 @@ def evaluate(model, evaluation_data, validation_flag=1):
         file.close()
 
 
+train(model, training_data)
 evaluate(model, validation_data, validation_flag=1)
 evaluate(model, test_data, validation_flag=0)
