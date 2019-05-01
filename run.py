@@ -507,9 +507,9 @@ if __name__ == '__main__':
     brown_data_dict = preprocess_data_brown('corpora/brown.txt')
     vocab_len = len(brown_data_dict['vocab'])
 
-    data_training = generator(brown_data_dict['data']['training'], brown_data_dict['labels']['training'], vocab_len, mode='training')
-    data_validation = generator(brown_data_dict['data']['validation'], brown_data_dict['labels']['validation'], vocab_len, mode='validation')
-    data_test = generator(brown_data_dict['data']['test'], brown_data_dict['labels']['test'], vocab_len, mode='test')
+    data_training = generator(brown_data_dict['data'], brown_data_dict['labels'], vocab_len, mode='training')
+    data_validation = generator(brown_data_dict['data'], brown_data_dict['labels'], vocab_len, mode='validation')
+    data_test = generator(brown_data_dict['data'], brown_data_dict['labels'], vocab_len, mode='test')
 
     num_batches_training = brown_data_dict['batches']['training']
     num_batches_validation = brown_data_dict['batches']['validation']
