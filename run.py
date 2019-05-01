@@ -351,7 +351,7 @@ num_epochs = 15
 num_batches = training_batches
 
 # select model
-model = Model(name='MLP5')
+model = Model(name='MLP9')
 # model = MLP3()
 # model = Model(name='MLP5')
 # model = Model(name='MLP7')
@@ -381,7 +381,7 @@ with tf.Session(graph=model.graph) as session:
     perplexity_exponent = 0
     perplexity_exponent_total = 0
 
-    for epoch in np.arange(num_epochs):
+    for epoch in tqdm(np.arange(num_epochs)):
         print('epoch:', epoch + 1)
         for batch in tqdm(np.arange(num_batches)):
             data_training, label = next(training_data)
