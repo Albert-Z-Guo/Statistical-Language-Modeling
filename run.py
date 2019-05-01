@@ -170,17 +170,6 @@ def generator(data, labels, vocab_size, mode=1):
         yield np.array(data_batch), np.array(labels_batch)
 
 
-data, labels, vocab = preprocess_data('corpora/brown.txt')
-
-training_data = generator(data, labels, len(vocab), mode=1)
-validation_data = generator(data, labels, len(vocab), mode=2)
-test_data = generator(data, labels, len(vocab), mode=3)
-
-training_batches = int(len(data)*0.8) // batch_size + 1
-validation_batches = int(len(data)*0.1) // batch_size + 1
-test_batches = int(len(data)*0.1) // batch_size + 1
-
-
 class Model:
     '''
     the following graph contains MLP 1, MLP 5, MLP 7, and MLP 9 loss optimizations
@@ -346,7 +335,7 @@ class MLP3:
         self.fetches = [MLP3_optimizer, MLP3_loss, MLP3_prob, summary_merged]
 
 
-def train(model):
+def train(model, data, num_batches):
     # create TensorBoard directory
     log_dir = model.name + '_log'
     if not os.path.exists(log_dir):
@@ -372,8 +361,8 @@ def train(model):
 
         for epoch in tqdm(np.arange(num_epochs)):
             print('epoch:', epoch + 1)
-            for batch in tqdm(np.arange(training_batches)):
-                data_training, label = next(training_data)
+            for batch in tqdm(np.arange(num_batches)):
+                data_training, label = next(data)
                 feed_dict={model.words:data_training, model.y:label, model.epsilon_t:learning_rate}
 
                 # collect runtime statistics
@@ -393,7 +382,7 @@ def train(model):
 
                 # record summaries
                 writer.add_summary(summary, batches_total)
-                if batch == (training_batches - 1):
+                if batch == (num_batches - 1):
                     writer.add_run_metadata(run_metadata, 'epoch{} batch {}'.format(epoch, batch))
 
                 if batch % 100 == 0 and batch > 0:
@@ -411,15 +400,10 @@ def train(model):
         file.close()
 
 
-def evaluate(model, evaluation_data, validation_flag=1):
+def evaluate(model, evaluation_data, num_batches, validation_flag=1):
     with tf.Session(graph=model.graph) as sess:
         saver = tf.train.Saver()
-        saver.restore(sess=sess, save_path=os.path.join(log_dir, '{}.ckpt'.format(model.name)))
-
-        if validation_flag:
-            num_batches = validation_batches
-        else:
-            num_batches = test_batches
+        saver.restore(sess=sess, save_path=os.path.join(model.name + '_log', '{}.ckpt'.format(model.name)))
 
         batches_total = 0
         loss_total = 0
@@ -454,12 +438,22 @@ def evaluate(model, evaluation_data, validation_flag=1):
 
 
 if __name__ == '__main__':
+    data, labels, vocab = preprocess_data(file_path='corpora/brown.txt')
+
+    data_training = generator(data, labels, len(vocab), mode=1)
+    data_validation = generator(data, labels, len(vocab), mode=2)
+    data_test = generator(data, labels, len(vocab), mode=3)
+
+    num_batches_training = int(len(data)*0.8) // batch_size + 1
+    num_batches_validation = int(len(data)*0.1) // batch_size + 1
+    num_batches_test = int(len(data)*0.1) // batch_size + 1
+
     # model = Model(name='MLP1')
     model = MLP3()
     # model = Model(name='MLP5')
     # model = Model(name='MLP7')
     # model = Model(name='MLP9')
 
-    train(model)
-    evaluate(model, validation_data, validation_flag=1)
-    evaluate(model, test_data, validation_flag=0)
+    # train(model, data_training, num_batches_training)
+    evaluate(model, data_validation, num_batches_validation, validation_flag=1)
+    evaluate(model, data_test, num_batches_test, validation_flag=0)
