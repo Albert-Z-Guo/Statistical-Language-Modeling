@@ -507,6 +507,9 @@ def evaluate(model, evaluation_data, num_batches, validation_flag=1):
 
 
 if __name__ == '__main__':
+    global num_epochs
+    num_epochs = 15
+    
     option = 'brown'
     model_choice = '3'
 
@@ -533,6 +536,7 @@ if __name__ == '__main__':
             model = Model(name='Brown_MLP7', V=vocab_len)
         elif model_choice == '9':
             model = Model(name='Brown_MLP9', V=vocab_len)
+        print('running MLP{} model on Brown corpora...'.format(model_choice))
 
     # use Wiki corpora
     if option == 'wiki':
@@ -548,6 +552,7 @@ if __name__ == '__main__':
         num_batches_test = wiki_data_dict['batches']['test']
 
         model = Model(name='Wiki_MLP7', V=vocab_len)
+        print('running MLP7 model on Wikitext-2 corpora...')
 
     # train, validate, and test
     train(model, data_training, num_batches_training)
