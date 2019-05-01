@@ -8,3 +8,15 @@ Because the Brown corpora used has minor discrepancy in word numbers as compared
 In addition, the weight decay used in this implementation leverages Tensorflow's built-in function `tf.contrib.opt.extend_with_decoupled_weight_decay` which includes biases, which are actually not included in the paper.
 
 As for the gradually decreasing learning rate, this implementation uses the given `epsilon_0` and `r`. However the number of parameter updates `r` per batch is not updated in this implementation because of number overflow issue as `r` gets very huge.
+
+The following table contains the result using Brown corpus with order of the model `n` = 5, `batch_size` = 256 and `epoch` = 15.
+
+Note that due to initialization of truncated normal variables, the reproduced results may be slightly different.
+
+|      | n | h   | m  | direct | train | valid | test |
+|------|---|-----|----|--------|-------|-------|------|
+| MLP1 | 5 | 50  | 60 | yes    | 136   | 346   | 349  |
+| MLP3 | 5 | 0   | 60 | yes    | 115   | 451   | 448  |
+| MLP5 | 5 | 50  | 30 | yes    | 205   | 489   | 448  |
+| MLP7 | 5 | 50  | 30 | yes    | 191   | 321   | 321  |
+| MLP9 | 5 | 100 | 30 | no     | 287   | 330   |      |
