@@ -458,6 +458,6 @@ with tf.Session(graph=model.graph) as sess:
         suffix = 'validation'
     else:
         suffix = 'test'
-        file = open('{}_{}.txt'.format(model.name, suffix), 'w')
+    file = open('{}_{}.txt'.format(model.name, suffix), 'w')
     file.write('final perplexity: ' + str(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
     file.close()
