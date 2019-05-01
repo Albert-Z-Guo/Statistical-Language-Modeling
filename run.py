@@ -347,11 +347,11 @@ class MLP3:
         self.fetches = [MLP3_optimizer, MLP3_loss, MLP3_prob, summary_merged]
 
 
-num_epochs = 20
+num_epochs = 15
 num_batches = training_batches
 
 # select model
-model = Model(name='MLP1')
+model = Model(name='MLP5')
 # model = MLP3()
 # model = Model(name='MLP5')
 # model = Model(name='MLP7')
@@ -362,7 +362,7 @@ log_dir = model.name + '_log'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-'''
+
 with tf.Session(graph=model.graph) as session:
     saver = tf.train.Saver()
     writer = tf.summary.FileWriter(log_dir, session.graph)
@@ -420,7 +420,7 @@ with tf.Session(graph=model.graph) as session:
     file = open('{}_traininig.txt'.format(model.name), 'w')
     file.write('final perplexity: ' + str(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
     file.close()
-'''
+
 
 validation_flag = 1
 with tf.Session(graph=model.graph) as sess:
