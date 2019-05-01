@@ -422,6 +422,7 @@ with tf.Session(graph=model.graph) as session:
     file.close()
 '''
 
+validation_flag = 1
 with tf.Session(graph=model.graph) as sess:
     saver = tf.train.Saver()
     saver.restore(sess, save_path=os.path.join(log_dir, '{}.ckpt'.format(model.name)))
@@ -433,8 +434,10 @@ with tf.Session(graph=model.graph) as sess:
     perplexity_exponent_total = 0
 
     for batch in tqdm(np.arange(num_batches)):
-        data_training, label = next(validation_data)
-        # data_training, label = next(test_data)
+        if validation_flag:
+            data_training, label = next(validation_data)
+        else:
+            data_training, label = next(test_data)
         feed_dict={model.words:data_training, model.y:label}
 
         loss_batch, prob_batch = sess.run([model.fetches[1], model.fetches[2]], feed_dict=feed_dict)
@@ -451,6 +454,10 @@ with tf.Session(graph=model.graph) as sess:
             print('average loss per word so far: {:.3}'.format(loss_total/batches_total/batch_size))
             print('average perplexity per word so far: {:.3}'.format(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
 
-    file = open('{}_validation.txt'.format(model.name), 'w')
+    if validation_flag:
+        suffix = 'validation'
+    else:
+        suffix = 'test'
+        file = open('{}_{}.txt'.format(model.name, suffix), 'w')
     file.write('final perplexity: ' + str(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
     file.close()
