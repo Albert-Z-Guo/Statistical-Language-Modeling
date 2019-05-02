@@ -39,7 +39,7 @@ Note that due to initialization of truncated normal variables in word embeddings
 | MLP1         | 5 | 50  | 60 | yes    | 122   | 264   | 277  |
 | MLP3         | 5 | 0   | 60 | yes    | 105   | 311   | 322  |
 | MLP5         | 5 | 50  | 30 | yes    | 173   | 268   | 280  |
-| MLP7         | 5 | 50  | 30 | yes    | 191   | 321   | 321  |
+| MLP7         | 5 | 50  | 30 | yes    | 174   | 261   | 273  |
 | MLP9         | 5 | 100 | 30 | no     | 287   | 334   | 335  |
 
 The following table contains the result using Wiki-text 2 corpus with order of the model `n` = 5, `batch_size` = 256, and `epoch` = 15.
@@ -48,4 +48,4 @@ The following table contains the result using Wiki-text 2 corpus with order of t
 |--------------|---|-----|----|--------|-------|-------|------|
 | MLP7         | 5 | 50  | 30 | yes    | 178 |  156  | 138 |
 
-One interesting thing observed is that the training perplexity can go lower than the paper suggested, but validation and test perplexities are not as good as the ones mentioned in the paper. The reason is not clear but most likely be attributed to the corpora discrepancies aforementioned and the learning rate tuning. And of course, due to faster convergence using Adam optimizer, the results tend to be overfit and thus give higher validation and test perplexities.
+One interesting thing observed is that the training and validation perplexities can go lower than the paper suggested, but test perplexities are a little bit higher than the ones mentioned in the paper sometimes. This suggests more epochs of training may leads to better results. In addition, due to faster convergence using Adam optimizer, the models tend to overfit on training data and thus give higher validation or test perplexities.
