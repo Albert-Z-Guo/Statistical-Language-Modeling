@@ -441,7 +441,7 @@ def train(model, data, num_batches):
 
                 # update learning rate
                 learning_rate = epsilon_0/(1+r*t)
-                t += 5
+                t += 10
 
                 batches_total += 1
                 loss_total += loss_batch
