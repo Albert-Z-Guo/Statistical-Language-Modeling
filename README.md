@@ -5,7 +5,7 @@ This repository contains modern implementation of the classic paper [A Neural Pr
 
 This implementation uses the same setting as the one mentioned in the paper: the first 800,000 words for training, the following 200,000 words for validation, and the remaining words for testing. However, because the [Brown corpora](https://en.wikipedia.org/wiki/Brown_Corpus) used in this project has minor discrepancy in word numbers as compared to the Brown corpora used in the paper, the final vocabulary size of the word embedding use is slightly different from the one mentioned in the paper. In addition, [Wikitext-2 corpora](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/) was used to evaluate MLP7's performance.
 
-In addition, the weight decay used in this implementation leverages Tensorflow's built-in function `tf.contrib.opt.extend_with_decoupled_weight_decay` which includes biases, which are actually not included in the paper.
+In addition, the weight decay used in this implementation leverages TensorFlow's built-in function `tf.contrib.opt.extend_with_decoupled_weight_decay` which includes biases, which are actually not included in the paper.
 
 Another major difference worth to note is that Adam optimizer instead of stochastic gradient descent optimizer is used extensively in this project for faster convergence.
 
@@ -37,7 +37,7 @@ Note that due to initialization of truncated normal variables in word embeddings
 | Brown Corpora | n | h   | m  | direct | train | valid | test |
 |--------------|---|-----|----|--------|-------|-------|------|
 | MLP1         | 5 | 50  | 60 | yes    | 122   | 264   | 277  |
-| MLP3         | 5 | 0   | 60 | yes    | 115   | 451   | 448  |
+| MLP3         | 5 | 0   | 60 | yes    | 105   | 311   | 322  |
 | MLP5         | 5 | 50  | 30 | yes    | 205   | 489   | 320  |
 | MLP7         | 5 | 50  | 30 | yes    | 191   | 321   | 321  |
 | MLP9         | 5 | 100 | 30 | no     | 287   | 334   | 335  |
