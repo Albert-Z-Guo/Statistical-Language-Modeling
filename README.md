@@ -36,9 +36,9 @@ python3 run.py --corpora=corpora_option --model=model_choice
  - `batch`          is the batch size for model training or evaluation; default is `256`
  - `n`              is the order of model; default `5`, which means a 4-word sequence followed by a 1-word prediction
 
-The following two table contain the results using Brown corpora and Wiki-text 2 corpora with order of the model `n` = 5, `batch_size` = 256, and `epoch` = 15. `h` is the number of hidden units, m is the number of word features for MLPs, and direct indicates whether there are direct connections from word features to outputs. More details can be found in the paper.
+Note that all perplexities calculated for each model will be saved in `results` directory generated on the fly.
 
-Note that due to initialization of truncated normal variables in word embeddings and other weight matrices, the reproduced results may be slightly different.
+The following two table contain the results using Brown corpora and Wiki-text 2 corpora with order of the model `n` = 5, `batch_size` = 256, and `epoch` = 15. `h` is the number of hidden units, m is the number of word features for MLPs, and direct indicates whether there are direct connections from word features to outputs. More details can be found in the paper. Note that due to initialization of truncated normal variables in word embeddings and other weight matrices, the reproduced results may be slightly different.
 
 | Brown Corpora | n | h   | m  | direct | train | valid | test |
 |--------------|---|-----|----|--------|-------|-------|------|
