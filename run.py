@@ -513,10 +513,14 @@ if __name__ == '__main__':
     parser.add_argument('--model', action="store", dest="model_choice", default='1', help="MLP models to choose: '1', '3', '5', '7', or '9'")
     parser.add_argument('--train', action="store_true", dest="training", default=False, help='flag to train selected model and generate new checkpoints')
     parser.add_argument('--epoch', action="store", dest="num_epochs", default=15, type=int, help='integer number of epochs for training')
+    parser.add_argument('--batch', action="store", dest="batch_size", default=256, type=int, help='integer number of batch size for training or evaluation')
+    parser.add_argument('--order', action="store", dest="n", default=5, type=int, help='order of the model')
     inputs = parser.parse_args()
     corpora_option = inputs.corpora_option
     model_choice = inputs.model_choice
     num_epochs = inputs.num_epochs
+    batch_size = inputs.batch_size
+    n = inputs.n
 
     # use Brown corpora
     if corpora_option == 'brown':
@@ -558,6 +562,9 @@ if __name__ == '__main__':
 
         model = Model(name='Wiki_MLP7', V=vocab_len)
         print('running MLP7 model on Wikitext-2 corpora...')
+    print('order of model:', n)
+    print('num_epochs:', num_epochs)
+    print('batch size:', batch_size)
 
     # train, validate, and test
     if inputs.training:
