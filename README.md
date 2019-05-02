@@ -7,6 +7,8 @@ Because the Brown corpora used in this project has minor discrepancy in word num
 
 In addition, the weight decay used in this implementation leverages Tensorflow's built-in function `tf.contrib.opt.extend_with_decoupled_weight_decay` which includes biases, which are actually not included in the paper.
 
+Another major difference worth to note is that Adam optimizer instead of stochastic gradient descent optimizer is used extensively in this project for faster convergence.
+
 As for the gradually decreasing learning rate, this implementation uses the given `epsilon_0` and `r`. However the number of parameter updates `r` per batch is not updated as the paper suggested in this implementation because of number overflow issue as `r` gets very huge. Instead `r += 5` is used.
 
 ### Environment Setup
@@ -45,4 +47,4 @@ The following table contains the result using Wiki-text 2 corpus with order of t
 |--------------|---|-----|----|--------|-------|-------|------|
 | MLP7         | 5 | 50  | 30 | yes    | 185 |  155  | 137 |
 
-One interesting thing observed is that the training perplexity can go lower than the paper suggested, but validation and test perplexities are not as good as the ones mentioned in the paper. The reason is not clear but most likely be attributed to the corpora discrepancies aforementioned and the learning rate tuning.
+One interesting thing observed is that the training perplexity can go lower than the paper suggested, but validation and test perplexities are not as good as the ones mentioned in the paper. The reason is not clear but most likely be attributed to the corpora discrepancies aforementioned and the learning rate tuning. And of course, due to faster convergence using Adam optimizer, the results tend to be overfit and thus give higher validation and test perplexities.
