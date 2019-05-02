@@ -573,5 +573,5 @@ if __name__ == '__main__':
     # train, validate, and test
     if inputs.training:
         train(model, data_training, num_batches_training)
-    # evaluate(model, data_validation, num_batches_validation, validation_flag=1)
-    # evaluate(model, data_test, num_batches_test, validation_flag=0)
+    evaluate(model, data_validation, num_batches_validation, validation_flag=1)
+    evaluate(model, data_test, num_batches_test, validation_flag=0)
