@@ -40,6 +40,7 @@ To visualize a model's computation graph via TensorBoard, run:
  ```bash
 tensorboard --logdir=model_checkpoint_dir
  ```
+then copy the generated link to a browser.
 
 Note that all perplexities calculated for each model will be saved in `results` directory generated on the fly.
 
