@@ -143,7 +143,7 @@ def preprocess_data_brown(file_path):
         data_test, labels_test = generate_data(tokenize_sents(vocab, sents_split_test))
         print('\ngenerated data in {:.4} s'.format(time.time()-start_time))
 
-        print('vocab size:', len(vocab))
+        print('vocab size:', len(vocab), '\n')
         for mode in ['training ', 'validation ', 'test ']:
             # check vocab sizes
             print(mode + 'sentence num:', len(eval('sents_split_{}'.format(mode))))
@@ -151,7 +151,7 @@ def preprocess_data_brown(file_path):
 
             # check data lengths
             print(mode + 'data len:', len(eval('data_{}'.format(mode))))
-            print(mode + 'label len:', len(eval('labels_{}'.format(mode))))
+            print(mode + 'label len:', len(eval('labels_{}'.format(mode))), '\n')
 
         # save memory
         del words_training
@@ -198,7 +198,7 @@ def preprocess_data_wiki():
         data_test, labels_test = generate_data(tokenize_sents(vocab, sents_split_test))
         print('\ngenerated training data in {:.4} s\n'.format(time.time()-start_time))
 
-        print('vocab size:', len(vocab))
+        print('vocab size:', len(vocab), '\n')
         for mode in ['training ', 'validation ', 'test ']:
             # check vocab sizes
             print(mode + 'sentence num:', len(eval('sents_split_{}'.format(mode))))
@@ -206,7 +206,7 @@ def preprocess_data_wiki():
 
             # check data lengths
             print(mode + 'data len:', len(eval('data_{}'.format(mode))))
-            print(mode + 'label len:', len(eval('labels_{}'.format(mode))))
+            print(mode + 'label len:', len(eval('labels_{}'.format(mode))), '\n')
 
         # save memory
         del sents_training
