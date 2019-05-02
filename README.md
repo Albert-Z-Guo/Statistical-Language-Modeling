@@ -18,12 +18,14 @@ pip3 install -r requirement.txt
 ### Performance Evaluation
 To run a model:
 ```bash
-python3 run.py --corpora CORPORA_OPTION --model MODEL_CHOICE --train --epoch NUM_EPOCHS
+python3 run.py --corpora=corpora_option --model=model_choice --train --epoch=num_epochs --batch=batch_szie --order=n
 ```
- - `CORPORA_OPTION` is the data to use: either `brown` or `wiki`; default is `brown`
- - `MODEL_CHOICE`   is the MLP models to choose from: `1`, `3`, `5`, `7`, or `9`; default is `1`
+ - `corpora_option` is the data to use: either `brown` or `wiki`; default is `brown`
+ - `model_choice`   is the MLP models to choose from: `1`, `3`, `5`, `7`, or `9`; default is `1`
  - `--train`        is the flag to train and generate new checkpoints; default is `False`
- - `NUM_EPOCHS`     is the integer number of epochs used for training; default is `15`
+ - `num_epochs`     is the integer number of epochs used for training; default is `15`
+ - `batch`          is the batch size for model training or evaluation; default is `256`
+ - `n`              is the order of model; default `5`, which means a 4-word sequence followed by a 1-word prediction
 
 The following table contains the result using Brown corpus with order of the model `n` = 5, `batch_size` = 256, and `epoch` = 15.
 
@@ -42,3 +44,5 @@ The following table contains the result using Wiki-text 2 corpus with order of t
 | Wiki-text 2 Corpora | n | h   | m  | direct | train | valid | test |
 |--------------|---|-----|----|--------|-------|-------|------|
 | MLP7         | 5 | 50  | 30 | yes    | 185 |  155  | 137 |
+
+One interesting thing observed is that the training perplexity can go lower than the paper suggested, but validation and test perplexities are not as good as the ones mentioned in the paper. The reason is not clear but most likely be attributed to the corpora discrepancies aforementioned and the learning rate tuning.
