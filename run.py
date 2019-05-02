@@ -233,24 +233,9 @@ def preprocess_data_wiki():
     return wiki_data_dict
 
 
-def generator(data, labels, vocab_size, mode='all'):
-    # mode = 1 for training, 2 for validation, 3 for testing
-    if mode == 'all':
-        i = 0
-        end = len(data) - 1
-    elif mode == 'training':
-        i = 0
-        # end = int(len(data)*0.8)
-        end = 800000 - 1
-    elif mode == 'validation':
-        # i = int(len(data)*0.8)
-        # end = i + int(len(data)*0.1)
-        i = 800000
-        end = 1000000 - 1
-    elif mode == 'test':
-        # i = int(len(data)*0.9)
-        i = 1000000
-        end = len(data) - 1
+def generator(data, labels, vocab_size):
+    i = 0
+    end = len(data) - 1
 
     while True:
         data_batch = []
@@ -568,9 +553,9 @@ if __name__ == '__main__':
 
     vocab_len = len(data_dict['vocab'])
 
-    data_training = generator(data_dict['data']['training'], data_dict['labels']['training'], vocab_len, mode='all')
-    data_validation = generator(data_dict['data']['validation'], data_dict['labels']['validation'], vocab_len, mode='all')
-    data_test = generator(data_dict['data']['test'], data_dict['labels']['test'], vocab_len, mode='all')
+    data_training = generator(data_dict['data']['training'], data_dict['labels']['training'], vocab_len)
+    data_validation = generator(data_dict['data']['validation'], data_dict['labels']['validation'], vocab_len)
+    data_test = generator(data_dict['data']['test'], data_dict['labels']['test'], vocab_len)
 
     num_batches_training = data_dict['batches']['training']
     num_batches_validation = data_dict['batches']['validation']
