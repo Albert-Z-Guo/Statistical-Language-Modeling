@@ -573,7 +573,7 @@ if __name__ == '__main__':
     elif model_choice == '9':
         model = Model(name='{}_MLP9'.format(corpora_name), V=vocab_len)
 
-    print('\nrunning MLP{} model on {} corpora...'.format(corpora_name, model_choice))
+    print('\nrunning MLP{} model on {} corpora...'.format(model_choice, corpora_name))
     print('order of model:', n)
     print('num_epochs:', num_epochs)
     print('batch size:', batch_size, '\n')
