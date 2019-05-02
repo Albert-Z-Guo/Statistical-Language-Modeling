@@ -590,7 +590,7 @@ if __name__ == '__main__':
     print('\nrunning MLP{} model on {} corpora...'.format(corpora_name, model_choice))
     print('order of model:', n)
     print('num_epochs:', num_epochs)
-    print('batch size:', batch_size)
+    print('batch size:', batch_size, '\n')
 
     # train, validate, and test
     if inputs.training:
