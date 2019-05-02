@@ -16,7 +16,7 @@ To install all libraries/dependencies used in this project, run
 ```bash
 pip3 install -r requirement.txt
 ```
-All TensorFlow model checkpoints can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1tWk1iaQz1mhw6bzh4mrBz4d2SrVNKGuX? usp=sharing).
+All TensorFlow model checkpoints can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1tWk1iaQz1mhw6bzh4mrBz4d2SrVNKGuX?usp=sharing).
 
 ### Performance Evaluation
 To run a model:
