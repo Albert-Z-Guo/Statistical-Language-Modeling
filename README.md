@@ -16,13 +16,19 @@ To install all libraries/dependencies used in this project, run
 ```bash
 pip3 install -r requirement.txt
 ```
-All TensorFlow model checkpoints can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1tWk1iaQz1mhw6bzh4mrBz4d2SrVNKGuX?usp=sharing).
+Download all TensorFlow model checkpoints from [Google Drive](https://drive.google.com/drive/folders/1tWk1iaQz1mhw6bzh4mrBz4d2SrVNKGuX?usp=sharing) to the same directory of `run.py`.
 
 ### Performance Evaluation
-To run a model:
+To train a model, run:
 ```bash
-python3 run.py --corpora=corpora_option --model=model_choice --train --epoch=num_epochs --batch=batch_szie --order=n
+python3 run.py --corpora=corpora_option --model=model_choice --train --epoch=num_epochs --batch=batch_size --order=n
 ```
+
+To evaluate a model from saved checkpoints, run:
+```bash
+python3 run.py --corpora=corpora_option --model=model_choice
+```
+
  - `corpora_option` is the data to use: either `brown` or `wiki`; default is `brown`
  - `model_choice`   is the MLP models to choose from: `1`, `3`, `5`, `7`, or `9`; default is `1`
  - `--train`        is the flag to train and generate new checkpoints; default is `False`
@@ -30,7 +36,7 @@ python3 run.py --corpora=corpora_option --model=model_choice --train --epoch=num
  - `batch`          is the batch size for model training or evaluation; default is `256`
  - `n`              is the order of model; default `5`, which means a 4-word sequence followed by a 1-word prediction
 
-The following table contains the result using Brown corpus with order of the model `n` = 5, `batch_size` = 256, and `epoch` = 15.
+The following two table contain the results using Brown corpora and Wiki-text 2 corpora with order of the model `n` = 5, `batch_size` = 256, and `epoch` = 15. `h` is the number of hidden units, m is the number of word features for MLPs, and direct indicates whether there are direct connections from word features to outputs. More details can be found in the paper.
 
 Note that due to initialization of truncated normal variables in word embeddings and other weight matrices, the reproduced results may be slightly different.
 
@@ -40,12 +46,10 @@ Note that due to initialization of truncated normal variables in word embeddings
 | MLP3         | 5 | 0   | 60 | yes    | 105   | 311   | 322  |
 | MLP5         | 5 | 50  | 30 | yes    | 173   | 268   | 280  |
 | MLP7         | 5 | 50  | 30 | yes    | 174   | 261   | 273  |
-| MLP9         | 5 | 100 | 30 | no     | 287   | 334   | 335  |
-
-The following table contains the result using Wiki-text 2 corpus with order of the model `n` = 5, `batch_size` = 256, and `epoch` = 15.
+| MLP9         | 5 | 100 | 30 | no     | 261   | 302   | 328  |
 
 | Wiki-text 2 Corpora | n | h   | m  | direct | train | valid | test |
 |--------------|---|-----|----|--------|-------|-------|------|
 | MLP7         | 5 | 50  | 30 | yes    | 178 |  156  | 138 |
 
-One interesting thing observed is that the training and validation perplexities can go lower than the paper suggested, but test perplexities are a little bit higher than the ones mentioned in the paper sometimes. This suggests more epochs of training may leads to better results. In addition, due to faster convergence using Adam optimizer, the models tend to overfit on training data and thus give higher validation or test perplexities.
+In general, we observe that the training and validation perplexities are lower than the paper presented and they can go even lower with more training, but test perplexities are a little bit higher than the ones mentioned in the paper sometimes. This suggests more epochs of training may leads to better results. One interesting thing is that our MLP9 doesn't overfit very much like the paper's version did and achieves OK validation and test perplexities (more epochs may lead to better result). In addition, due to faster convergence using Adam optimizer, the models tend to overfit on training data and thus give higher validation or test perplexities.
