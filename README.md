@@ -32,11 +32,11 @@ python3 run.py --corpora=corpora_option --model=model_choice --train --epoch=num
 
 The following table contains the result using Brown corpus with order of the model `n` = 5, `batch_size` = 256, and `epoch` = 15.
 
-Note that due to initialization of truncated normal variables, the reproduced results may be slightly different.
+Note that due to initialization of truncated normal variables in word embeddings and other weight matrices, the reproduced results may be slightly different.
 
 | Brown Corpora | n | h   | m  | direct | train | valid | test |
 |--------------|---|-----|----|--------|-------|-------|------|
-| MLP1         | 5 | 50  | 60 | yes    | 136   | 346   | 349  |
+| MLP1         | 5 | 50  | 60 | yes    | 122   | 264   | 277  |
 | MLP3         | 5 | 0   | 60 | yes    | 115   | 451   | 448  |
 | MLP5         | 5 | 50  | 30 | yes    | 205   | 489   | 320  |
 | MLP7         | 5 | 50  | 30 | yes    | 191   | 321   | 321  |
