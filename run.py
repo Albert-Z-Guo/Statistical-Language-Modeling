@@ -166,7 +166,7 @@ def preprocess_data_brown(file_path):
                             'batches': {'training': num_batches(data_training), 'validation': num_batches(data_validation), 'test': num_batches(data_test)},
                             'vocab': vocab}
 
-        print('brown_data_dict size: {:.3} MB\n'.format(sys.getsizeof(wiki_data_dict) / 1024**2))
+        print('brown_data_dict size: {:.3} MB\n'.format(sys.getsizeof(brown_data_dict) / 1024**2))
 
         # save processed data
         with open('brown_data.pickle', 'wb') as file:
