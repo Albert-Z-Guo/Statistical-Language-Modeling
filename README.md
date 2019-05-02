@@ -9,7 +9,7 @@ In addition, the weight decay used in this implementation leverages Tensorflow's
 
 Another major difference worth to note is that Adam optimizer instead of stochastic gradient descent optimizer is used extensively in this project for faster convergence.
 
-As for the gradually decreasing learning rate, this implementation uses the given `epsilon_0` and `r`. However the number of parameter updates `r` per batch is not updated as the paper suggested in this implementation because of number overflow issue as `r` gets very huge. Instead `r += 5` is used.
+As for the gradually decreasing learning rate, this implementation uses the given `epsilon_0` and `r`. However the number of parameter updates `r` per batch is not updated as the paper suggested in this implementation because of number overflow issue as `r` gets very huge. Instead `r += 10` is used.
 
 ### Environment Setup
 To install all libraries/dependencies used in this project, run
