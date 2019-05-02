@@ -29,12 +29,17 @@ To evaluate a model from saved checkpoints, run:
 python3 run.py --corpora=corpora_option --model=model_choice
 ```
 
- - `corpora_option` is the data to use: either `brown` or `wiki`; default is `brown`
- - `model_choice`   is the MLP models to choose from: `1`, `3`, `5`, `7`, or `9`; default is `1`
- - `--train`        is the flag to train and generate new checkpoints; default is `False`
- - `num_epochs`     is the integer number of epochs used for training; default is `15`
- - `batch`          is the batch size for model training or evaluation; default is `256`
- - `n`              is the order of model; default `5`, which means a 4-word sequence followed by a 1-word prediction
+- `corpora_option` is the data to use: either `brown` or `wiki`; default is `brown`
+- `model_choice`   is the MLP models to choose from: `1`, `3`, `5`, `7`, or `9`; default is `1`
+- `--train`        is the flag to train and generate new checkpoints; default is `False`
+- `num_epochs`     is the integer number of epochs used for training; default is `15`
+- `batch`          is the batch size for model training or evaluation; default is `256`
+- `n`              is the order of model; default `5`, which means a 4-word sequence followed by a 1-word prediction
+
+To visualize a model's computation graph via TensorBoard, run:
+ ```bash
+tensorboard --logdir=model_checkpoint_dir
+ ```
 
 Note that all perplexities calculated for each model will be saved in `results` directory generated on the fly.
 
