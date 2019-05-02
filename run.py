@@ -35,6 +35,7 @@ def split(sents):
     sents_split = []
     words = []
     for sent in sents:
+        # decompose sentence to words and punctuations
         sent_cleansed = re.findall(r"[\w'-]+|[^\w ]+", sent)
         sents_split.append(sent_cleansed)
         for word in sent_cleansed:
@@ -43,7 +44,7 @@ def split(sents):
 
 
 def tokenize_sents(vocab, sents):
-    # map word to index number
+    '''map words in a sentence to index numbers'''
     sents_mapped = []
     for sent in sents:
         sents_mapped.append([vocab.get(word, 0) for word in sent])
@@ -72,7 +73,7 @@ def generate_data(sents_mapped):
         end_index = n - 1
         sent_len = len(sent)
 
-        # skip too short sentence
+        # skip sentence whose length is smaller than order of the model
         if sent_len < n:
             continue
 
