@@ -349,7 +349,6 @@ class Model:
                 MLP5_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=self.epsilon_t).minimize(MLP5_loss)
                 MLP7_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=self.epsilon_t).minimize(MLP7_loss)
                 MLP9_optimizer = Custom_Optimizer(weight_decay=weight_decay, learning_rate=self.epsilon_t).minimize(MLP9_loss)
-            #         optimizer = tf.train.AdamOptimizer(learning_rate=epsilon_t).minimize(loss) # without weight decay
 
             # merge all summaries
             summary_merged = tf.summary.merge_all()
@@ -536,6 +535,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch', action="store", dest="batch_size", default=256, type=int, help='integer number of batch size for model training or evaluation')
     parser.add_argument('--order', action="store", dest="n", default=5, type=int, help='order of the model')
     inputs = parser.parse_args()
+
     corpora_option = inputs.corpora_option
     model_choice = inputs.model_choice
     num_epochs = inputs.num_epochs
