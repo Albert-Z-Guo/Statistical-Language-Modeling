@@ -512,7 +512,7 @@ if __name__ == '__main__':
     parser.add_argument('--corpora', action="store", dest="corpora_option", default='brown', help="data to use: either 'brown' or 'wiki'")
     parser.add_argument('--model', action="store", dest="model_choice", default='1', help="MLP models to choose: '1', '3', '5', '7', or '9'")
     parser.add_argument('--train', action="store_true", dest="training", default=False, help='flag to train selected model and generate new checkpoints')
-    parser.add_argument('--epoch', action="store", dest="num_epochs", default=15, help='integer number of epochs for training')
+    parser.add_argument('--epoch', action="store", dest="num_epochs", default=15, type=int, help='integer number of epochs for training')
     inputs = parser.parse_args()
     corpora_option = inputs.corpora_option
     model_choice = inputs.model_choice

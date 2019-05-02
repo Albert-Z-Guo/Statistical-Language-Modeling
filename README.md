@@ -16,15 +16,15 @@ pip3 install -r requirement.txt
 ```
 
 ### Performance Evaluation
-To run a model:
-```python
-python3 run.py [--corpora CORPORA_OPTION] [--model MODEL_CHOICE] [--train] [--epoch NUM_EPOCHS]
+To train a model:
+```bash
+python3 run.py --corpora CORPORA_OPTION --model MODEL_CHOICE --train --epoch NUM_EPOCHS
 ```
 where  
- - `CORPORA_OPTION` is the data to use: either 'brown' or 'wiki'
- - `MODEL_CHOICE` is MLP models to choose from: '1', '3', '5', '7', or '9'
- - `--train` is the option to train and generate new checkpoints
- - `NUM_EPOCHS` is the integer number of epochs used for training
+ - `CORPORA_OPTION` is the data to use: either 'brown' or 'wiki'; default is 'brown'
+ - `MODEL_CHOICE` is the MLP models to choose from: '1', '3', '5', '7', or '9'; default is '1'
+ - `--train` is the flag to train and generate new checkpoints; default is False
+ - `NUM_EPOCHS` is the integer number of epochs used for training; default is 15
 
 The following table contains the result using Brown corpus with order of the model `n` = 5, `batch_size` = 256, and `epoch` = 15.
 
@@ -36,7 +36,7 @@ Note that due to initialization of truncated normal variables, the reproduced re
 | MLP3         | 5 | 0   | 60 | yes    | 115   | 451   | 448  |
 | MLP5         | 5 | 50  | 30 | yes    | 205   | 489   | 320  |
 | MLP7         | 5 | 50  | 30 | yes    | 191   | 321   | 321  |
-| MLP9         | 5 | 100 | 30 | no     | 287   | 330   |      |
+| MLP9         | 5 | 100 | 30 | no     | 287   | 334   | 335  |
 
 The following table contains the result using Wiki-text 2 corpus with order of the model `n` = 5, `batch_size` = 256, and `epoch` = 15.
 
