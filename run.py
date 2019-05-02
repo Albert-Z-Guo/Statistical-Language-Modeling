@@ -210,12 +210,16 @@ def generator(data, labels, vocab_size, mode='all'):
         end = len(data) - 1
     elif mode == 'training':
         i = 0
-        end = int(len(data)*0.8)
+        # end = int(len(data)*0.8)
+        end = 800000 - 1
     elif mode == 'validation':
-        i = int(len(data)*0.8)
-        end = i + int(len(data)*0.1)
+        # i = int(len(data)*0.8)
+        # end = i + int(len(data)*0.1)
+        i = 800000
+        end = 1000000 - 1
     elif mode == 'test':
-        i = int(len(data)*0.9)
+        # i = int(len(data)*0.9)
+        i = 1000000
         end = len(data) - 1
 
     while True:
@@ -569,5 +573,5 @@ if __name__ == '__main__':
     # train, validate, and test
     if inputs.training:
         train(model, data_training, num_batches_training)
-    evaluate(model, data_validation, num_batches_validation, validation_flag=1)
-    evaluate(model, data_test, num_batches_test, validation_flag=0)
+    # evaluate(model, data_validation, num_batches_validation, validation_flag=1)
+    # evaluate(model, data_test, num_batches_test, validation_flag=0)
