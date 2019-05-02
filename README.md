@@ -7,7 +7,7 @@ Because the Brown corpora used has minor discrepancy in word numbers as compared
 
 In addition, the weight decay used in this implementation leverages Tensorflow's built-in function `tf.contrib.opt.extend_with_decoupled_weight_decay` which includes biases, which are actually not included in the paper.
 
-As for the gradually decreasing learning rate, this implementation uses the given `epsilon_0` and `r`. However the number of parameter updates `r` per batch is not updated in this implementation because of number overflow issue as `r` gets very huge.
+As for the gradually decreasing learning rate, this implementation uses the given `epsilon_0` and `r`. However the number of parameter updates `r` per batch is not updated as the paper suggested in this implementation because of number overflow issue as `r` gets very huge. Instead `r += 5` is used.
 
 ### Environment Setup
 To install all libraries/dependencies used in this project, run
@@ -16,15 +16,14 @@ pip3 install -r requirement.txt
 ```
 
 ### Performance Evaluation
-To train a model:
+To run a model:
 ```bash
 python3 run.py --corpora CORPORA_OPTION --model MODEL_CHOICE --train --epoch NUM_EPOCHS
 ```
-where  
- - `CORPORA_OPTION` is the data to use: either 'brown' or 'wiki'; default is 'brown'
- - `MODEL_CHOICE` is the MLP models to choose from: '1', '3', '5', '7', or '9'; default is '1'
- - `--train` is the flag to train and generate new checkpoints; default is False
- - `NUM_EPOCHS` is the integer number of epochs used for training; default is 15
+ - `CORPORA_OPTION` is the data to use: either `brown` or `wiki`; default is `brown`
+ - `MODEL_CHOICE`   is the MLP models to choose from: `1`, `3`, `5`, `7`, or `9`; default is `1`
+ - `--train`        is the flag to train and generate new checkpoints; default is `False`
+ - `NUM_EPOCHS`     is the integer number of epochs used for training; default is `15`
 
 The following table contains the result using Brown corpus with order of the model `n` = 5, `batch_size` = 256, and `epoch` = 15.
 
