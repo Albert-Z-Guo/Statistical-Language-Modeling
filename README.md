@@ -50,6 +50,6 @@ The following two table contain the results using Brown corpora and Wiki-text 2 
 
 | Wiki-text 2 Corpora | n | h   | m  | direct | train | valid | test |
 |--------------|---|-----|----|--------|-------|-------|------|
-| MLP7         | 5 | 50  | 30 | yes    | 178 |  156  | 138 |
+| MLP7         | 5 | 50  | 30 | yes    | 185 |  154  | 137 |
 
 In general, we observe that the training and validation perplexities are lower than the paper presented and they can go even lower with more training, but test perplexities are a little bit higher than the ones mentioned in the paper sometimes. This suggests more epochs of training may leads to better results. One interesting thing is that our MLP9 doesn't overfit very much like the paper's version did and achieves OK validation and test perplexities (more epochs may lead to better result). In addition, due to faster convergence using Adam optimizer, the models tend to overfit on training data and thus give higher validation or test perplexities.

@@ -95,7 +95,7 @@ def num_batches(data):
 def preprocess_data_brown(file_path):
     print('preprocessing Brown corpora...')
     try:
-        with open('brown_data.pickle', 'rb') as file:
+        with open('corpora/brown_data.pickle', 'rb') as file:
             brown_data_dict = pickle.load(file)
         print('saved data loaded')
     except:
@@ -170,7 +170,7 @@ def preprocess_data_brown(file_path):
         print('brown_data_dict size: {:.3} MB\n'.format(sys.getsizeof(brown_data_dict) / 1024**2))
 
         # save processed data
-        with open('brown_data.pickle', 'wb') as file:
+        with open('corpora/brown_data.pickle', 'wb') as file:
             pickle.dump(brown_data_dict, file, protocol=pickle.HIGHEST_PROTOCOL)
 
     return brown_data_dict
@@ -179,7 +179,7 @@ def preprocess_data_brown(file_path):
 def preprocess_data_wiki():
     print('preprocessing Wikitext-2 corpora...')
     try:
-        with open('wiki_data.pickle', 'rb') as file:
+        with open('corpora/wiki_data.pickle', 'rb') as file:
             wiki_data_dict = pickle.load(file)
         print('saved data loaded')
     except:
@@ -228,7 +228,7 @@ def preprocess_data_wiki():
         print('wiki_data_dict size: {:.3} MB\n'.format(sys.getsizeof(wiki_data_dict) / 1024**2))
 
         # save processed data
-        with open('wiki_data.pickle', 'wb') as file:
+        with open('corpora/wiki_data.pickle', 'wb') as file:
             pickle.dump(wiki_data_dict, file, protocol=pickle.HIGHEST_PROTOCOL)
 
     return wiki_data_dict
