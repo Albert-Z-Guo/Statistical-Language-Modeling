@@ -259,7 +259,7 @@ def generator(data, labels, vocab_size):
 class Model:
     '''
     the following graph contains MLP 1, MLP 5, MLP 7, and MLP 9 loss optimizations
-    MLP 1 model: y = b + Wx + Utanh(d + Hx) where MLP1 is tanh(d + Hx)
+    MLP 1 model: y = b + Wx + Utanh(d + Hx)         where MLP1 is tanh(d + Hx)
     MLP 2 model: y = b + Wx + Utanh(d2 + hid2•MLP1) where NLP2 is tanh(d2 + HMLP1)
     MLP 3 model: y = b + Wx + Utanh(d3 + hid3•MLP2) where NLP3 is tanh(d3 + HMLP2)
     MLP 4 model: y = b + Wx + Utanh(d4 + hid4•MLP3)
@@ -267,7 +267,7 @@ class Model:
     MLP 6 model: y = b + Wx + Utanh(d6 + hid6•MLP5)
     MLP 7 model: y = b + Wx + Utanh(d7 + hid7•MLP6)
     MLP 8 model: y = b + Wx + Utanh(d8 + hid8•MLP7)
-    MLP 9 model: y = b + Utanh(d9 + hid9•MLP8) (no direct connections)
+    MLP 9 model: y = b + Utanh(d9 + hid9•MLP8)      (no direct connections)
     Note that h is nonzero in above models
     '''
     def __init__(self, name, V, batch_size=batch_size, weight_decay=10**(-4)):
