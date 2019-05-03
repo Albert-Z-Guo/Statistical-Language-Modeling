@@ -43,14 +43,6 @@ def split(sents):
     return words, sents_split
 
 
-def tokenize_sents(vocab, sents):
-    '''map words in a sentence to index numbers'''
-    sents_mapped = []
-    for sent in sents:
-        sents_mapped.append([vocab.get(word, 0) for word in sent])
-    return np.array(sents_mapped)
-
-
 def select_vocab(words):
     vocab = {}
     vocab['UNK'] = 0
@@ -62,6 +54,14 @@ def select_vocab(words):
             vocab['UNK'] += 1
     vocab_reversed = dict(zip(vocab.values(), vocab.keys()))
     return vocab, vocab_reversed
+
+
+def tokenize_sents(vocab, sents_split):
+    '''map words in a sentence to index numbers'''
+    sents_mapped = []
+    for sent in sents_split:
+        sents_mapped.append([vocab.get(word, 0) for word in sent])
+    return np.array(sents_mapped)
 
 
 def generate_data(sents_mapped):
