@@ -48,7 +48,7 @@ def select_vocab(words):
     vocab['UNK'] = 0
     word_count_sorted = sorted(collections.Counter(words).items(), key=lambda item: item[1])
     for item in word_count_sorted:
-        if item[1] > 3: # if word frequency < 3
+        if item[1] > 3: # if word frequency > 3
             vocab[item[0]] = len(vocab)
         else:
             vocab['UNK'] += 1
