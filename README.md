@@ -19,7 +19,7 @@ pip3 install -r requirement.txt
 
 Download all TensorFlow model checkpoints from [Google Drive](https://drive.google.com/drive/folders/1tWk1iaQz1mhw6bzh4mrBz4d2SrVNKGuX?usp=sharing) to the same directory of `run.py`.
 
-In addition, to ensure smoothness of data preprocessing in case of reproducing any saved .pickle files, make sure your system's `locale` variable (or equivalent) is set to `UTF-8`, not `POSIX` or any other format ([tutorial link](https://www.tecmint.com/set-system-locales-in-linux/)).
+In addition, to ensure smoothness of data preprocessing in case of reproducing any saved `.pickle` files, make sure your system's `locale` variable (or equivalent) is set to `UTF-8`, not `POSIX` or any other format ([tutorial link](https://www.tecmint.com/set-system-locales-in-linux/)).
 
 ### Performance Evaluation
 To train a model, run:
