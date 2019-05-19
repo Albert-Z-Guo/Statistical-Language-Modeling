@@ -73,7 +73,7 @@ flags = tf.flags
 logging = tf.logging
 
 flags.DEFINE_string("model", "small", "A type of model. Possible options are: small, medium, large.")
-flags.DEFINE_string("data_path", None, "Where the training/test data is stored.")
+flags.DEFINE_string("data_path", "data", "Where the training/test data is stored.")
 flags.DEFINE_string("save_path", "years", "Model output directory.")
 flags.DEFINE_bool("use_fp16", False, "Train using 16-bit floats instead of 32bit floats")
 flags.DEFINE_integer("num_gpus", 1,
@@ -447,7 +447,7 @@ def run_epoch(session, model, eval_op=None, verbose=False):
             print()
 
     return np.exp(-numerator/num_token)
-    
+
 
 def get_config():
     """Get model config."""
