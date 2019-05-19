@@ -1,5 +1,5 @@
 # Recurrent Neural Network Regularization
-This repository contains adaptation of Wojciech Zaremba's [Recurrent Neural Network Regularization](https://arxiv.org/abs/1409.2329) [TensorFlow implementation](https://github.com/tensorflow/models/tree/master/tutorials/rnn/ptb) for Number Token Perplexity Measurement. All results were obtained with an NVIDIA's [GeForce RTX 2080 Ti](https://www.nvidia.com/en-us/geforce/graphics-cards/rtx-2080-ti/) Graphics Card.
+This repository contains an adaptation of the [TensorFlow implementation](https://github.com/tensorflow/models/tree/master/tutorials/rnn/ptb) of Wojciech Zaremba's [Recurrent Neural Network Regularization](https://arxiv.org/abs/1409.2329) for Number Token Perplexity Measurement. All results were obtained with an NVIDIA's [GeForce RTX 2080 Ti](https://www.nvidia.com/en-us/geforce/graphics-cards/rtx-2080-ti/) Graphics Card.
 
 ## Number Token Definitions
 - rounds = [10, 20, ..., 90, 100, 200, ..., 900]
