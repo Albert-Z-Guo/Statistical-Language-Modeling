@@ -1,8 +1,7 @@
-# Statistical-Language-Modeling
-
-## Deep Learning for Natural Language Processing
+# A Neural Probabilistic Language Model
 This repository contains a modern implementation of the classic paper [A Neural Probabilistic Language Model](http://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf) by [Yoshua Bengio](https://en.wikipedia.org/wiki/Yoshua_Bengio) et al. in 2003 using [TensorFlow](https://www.tensorflow.org/). All results were obtained with an NVIDIA's [GeForce RTX 2080 Ti](https://www.nvidia.com/en-us/geforce/graphics-cards/rtx-2080-ti/) Graphics Card.
 
+## Implementation Details
 This implementation uses the same setting as the one mentioned in the paper for the [Brown corpora](https://en.wikipedia.org/wiki/Brown_Corpus): the first 800,000 words for training, the following 200,000 words for validation, and the remaining words for testing. However, because the Brown corpora used in this project has minor discrepancy in word numbers as compared to the Brown corpora used in the paper, the final vocabulary size of the word embedding use is slightly different from the one mentioned in the paper. Besides Brown corpora, [Wikitext-2 corpora](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/) is used to evaluate MLP7's performance in particular.
 
 In addition, the weight decay used in this implementation leverages TensorFlow's built-in function `tf.contrib.opt.extend_with_decoupled_weight_decay` which includes biases, which are actually not included in the paper. But for convenience of implementing parameters' weight decay, this function is used anyway.
@@ -11,7 +10,7 @@ Another major difference worth to note is that Adam optimizer instead of stochas
 
 As for the gradually decreasing learning rate, this implementation uses the given `epsilon_0` and `r`. However the number of parameter updates `r` per batch is not updated as the paper suggested in this implementation because of number overflow issue as `r` gets very huge. Instead `r += 10` is used.
 
-### Environment Setup
+## Environment Setup
 To install all libraries/dependencies used in this project, run
 ```bash
 pip3 install -r requirement.txt
@@ -21,7 +20,8 @@ Download all TensorFlow model checkpoints from [Google Drive](https://drive.goog
 
 In addition, to ensure smoothness of data preprocessing in case of reproducing any saved `.pickle` files, make sure your system's `locale` variable (or equivalent) is set to `UTF-8`, not `POSIX` or any other format ([tutorial link](https://www.tecmint.com/set-system-locales-in-linux/)).
 
-### Performance Evaluation
+## Performance Evaluation
+### Experiment
 To train a model, run:
 ```bash
 python3 run.py --corpora=corpora_option --model=model_choice --train --epoch=num_epochs --batch=batch_size --order=n
@@ -47,6 +47,7 @@ then copy the generated link to a browser.
 
 Note that all perplexities calculated for each model will be saved in `results` directory generated on the fly.
 
+### Results
 The following two table contain the results (saved also at [Google Drive](https://drive.google.com/drive/folders/1tWk1iaQz1mhw6bzh4mrBz4d2SrVNKGuX?usp=sharing)) using Brown corpora and Wiki-text 2 corpora with order of the model `n` = 5, `batch_size` = 256, and `epoch` = 15. `h` is the number of hidden units, `m` is the number of word features for MLPs, and `direct` indicates whether there are direct connections from word features to outputs. More details can be found in the paper. Note that due to initialization of truncated normal variables in word embeddings and other weight matrices, the reproduced results may be slightly different.
 
 | Brown Corpora | n | h   | m  | direct | train | valid | test |
