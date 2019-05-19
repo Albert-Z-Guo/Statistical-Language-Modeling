@@ -8,7 +8,7 @@ This repository contains adaptation of Wojciech Zaremba's [Recurrent Neural Netw
 
 ## Implementation Details
 This implementation uses the same setting as the one mentioned in the paper, except the following changes:
-1. The corpora used for training, validation, and testing is now [Wikitext-2 corpora](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/) instead of the [Penn Tree Bank corpora](https://catalog.ldc.upenn.edu/LDC99T42) (PTB).
+1. The corpora used for training, validation, and testing is now [Wikitext-2](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/) instead of [Penn Tree Bank](https://catalog.ldc.upenn.edu/LDC99T42) (PTB).
 2. The vocabulary size is increased from 10000 to about 27250 (since Wikitext-2's vocabulary size is larger than PTB's vocabulary size which is exactly 10000) for each word with frequency > 3.
 3. For words in valid and test data but not in training data, they are treated as 'UNK' instead of not reading them.
 4. Retrieval of an additional `prob` ndarray ([batch_size, num_steps, vocab_size]) is enabled by adding a softmax function in computation graph, @property, and relevant export_ops and import_ops support.
@@ -27,12 +27,12 @@ To experiment a model, run:
 python3 ptb_word.py --data_path=data --model=model_choice --save_path=token_class_name --token_class=token_class_name --num_gpus=num_gpus --run_mode=run_mode
 ```
 
-- `data_path`      is the data path: default is `data`
+- `data_path`      is the data path; default is `data`
 - `model_choice`   is the model to choose from: `small`, `medium`, or `large`; default is `small`
 - `save_path`      is the path to save model; default is `rounds` which is the default number token class
 - `token_class`    is the number token class to choose from: `rounds`, `days`, or `years`; default is `rounds`
 - `num_gpus`       is the number of gpus available; default is `1`
-- `run_mode`       is the low level implementation of LSTM cell to choose from `CUDNN`, `BASIC`, or `BLOCK`, representing cudnn_lstm, basic_lstm, and lstm_block_cell classes:; default is `CUDNN`
+- `run_mode`       is the low level implementation of LSTM cell to choose from `CUDNN`, `BASIC`, or `BLOCK`, representing cudnn_lstm, basic_lstm, and lstm_block_cell classes; default is `CUDNN`
 
 ### Results
 | Number Token Class | train | valid | test |
