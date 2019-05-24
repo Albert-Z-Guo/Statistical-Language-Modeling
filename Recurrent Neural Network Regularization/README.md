@@ -35,8 +35,8 @@ python3 ptb_word.py --data_path=data --model=model_choice --save_path=token_clas
 - `run_mode`       is the low level implementation of LSTM cell to choose from `CUDNN`, `BASIC`, or `BLOCK`, representing cudnn_lstm, basic_lstm, and lstm_block_cell classes; default is `CUDNN`
 
 ### Results
-| Number Token Class | train | valid | test |
-|--------------------|-------|-------|------|
-| rounds             |       |       | 798  |
-| days               |       |       | 209  |
-| years              |       |       | 398  |
+| Number Token Class | Test Perplexity|
+|--------------------|----------------|
+| rounds             | 798            |
+| days               | 209            |
+| years              | 398            |
