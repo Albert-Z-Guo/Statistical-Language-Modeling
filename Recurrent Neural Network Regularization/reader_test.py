@@ -35,13 +35,13 @@ class PtbReaderTest(tf.test.TestCase):
              " want some cheesy puffs ?"])
 
     def testPtbRawData(self):
-        tmpdir = tf.test.get_temp_dir()
+        dir = 'simple-examples/data'
         for suffix in "train", "valid", "test":
-            filename = os.path.join(tmpdir, "ptb.%s.txt" % suffix)
+            filename = os.path.join(dir, "ptb.%s.txt" % suffix)
             with tf.gfile.GFile(filename, "w") as fh:
                 fh.write(self._string_data)
         # Smoke test
-        output = reader.ptb_raw_data(tmpdir)
+        output = reader.ptb_raw_data(dir)
         self.assertEqual(len(output), 4)
 
     def testPtbProducer(self):
