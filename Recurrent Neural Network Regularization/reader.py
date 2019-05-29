@@ -37,6 +37,10 @@ def _read_words(filename):
 
 
 def _build_vocab(filename):
+    '''Generate a word_to_id dictionary.
+
+    Check out test.ipynb for more details.
+    '''
     data = _read_words(filename)
     word_to_id = {}
     word_to_id['UNK'] = 0
@@ -144,7 +148,22 @@ def generate_tokens(data_path, token_class):
 
 
 def generator(data, batch_size, num_steps, tokens):
-    '''token positions generator'''
+    '''Generate token positions iteratively.
+
+    The shape of data is [batch_size, batch_len], obtained in the same way as
+    the author did in function 'ptb_producer' (line 88).
+
+    During training/validaiton/test, loss and perplexity is calculated per
+    slice of data in shape of [batch_size, num_steps]
+    shifting on data from left to right.
+
+    For each slice of data, token position [j, k, data[j][i + k]] will be used to
+    extract the corresponding probability from the 'prob' tensor derived from logits,
+    whose shape is [batch_size, num_steps, vocab_size] (line 137 in ptb_word_lm.py).
+
+    Note that data[j][i + k] is in range [0, vocab_size] and represent
+    a token id.
+    '''
     data_len = len(data)
     batch_len = data_len // batch_size
     data = np.reshape(data[0: batch_size * batch_len], [batch_size, batch_len])
