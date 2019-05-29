@@ -35,7 +35,7 @@ class PtbReaderTest(tf.test.TestCase):
              " want some cheesy puffs ?"])
 
     def testPtbRawData(self):
-        dir = 'simple-examples/data'
+        dir = 'data'
         for suffix in "train", "valid", "test":
             filename = os.path.join(dir, "ptb.%s.txt" % suffix)
             with tf.gfile.GFile(filename, "w") as fh:
