@@ -45,6 +45,6 @@ For `model_choice=small` configuration:
 
 It is worth to note that when `num_steps` is 1 in test mode, token perplexities obtained are in the reasonable ranges. However, during training and validation, token perplexities are somehow much higher using the method described above.
 
-This may be due to the reason that during training and validation, since the `num_steps` is greater than one, there are large chunks of overlaps (depending on the length of `num_steps`) between the generated `x` and `y` pairs (see `ptb_producer` in `reader.py`). For such cases, the tokens may have much lower probabilities in the overlapping region as compared to tokens at the right-most predicted steps, resulting in much higher perplexities.
+This may be due to the reason that during training and validation, since the `num_steps` is greater than 1, there are large chunks of overlaps (depending on the length of `num_steps`) between the generated `x` and `y` pairs (see `ptb_producer` in `reader.py`). For such cases, the tokens may have much lower probabilities in the overlapping region as compared to tokens at the right-most predicted steps, resulting in much higher perplexities.
 
 In other words, in test mode, `num_steps` is 1 and thus there is no overlapping region between the `x` and `y` pairs, resulting in appropriate token perplexities.
