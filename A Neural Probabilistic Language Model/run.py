@@ -92,7 +92,7 @@ def num_batches(data):
     return len(data) // batch_size + 1
 
 
-def preprocess_data_brown(file_path):
+def preprocess_data_brown():
     print('preprocessing Brown corpora...')
     try:
         with open('corpora/brown_data.pickle', 'rb') as file:
@@ -100,7 +100,7 @@ def preprocess_data_brown(file_path):
         print('saved data loaded')
     except:
         start_time = time.time()
-        sents = sent_tokenize(cleanse_corpora(file_path))
+        sents = sent_tokenize(cleanse_corpora('corpora/brown.txt'))
         # use data from NLTK directly
         # sents = nltk.corpus.brown.sents()
 
@@ -248,7 +248,7 @@ def generator(data, labels, vocab_size):
 
             data_batch.append(data[i])
             labels_batch.append(label_one_hot_encoded)
-            if i == end - (n-1):
+            if i == end - (n-1): # if reaching the end start from the beginning
                 i = 0
             else:
                 i += 1
@@ -445,7 +445,7 @@ def train(model, data, num_batches):
         epsilon_0 = 10**(-3)
         r = 10**(-8) # decrease factor
         # number of parameters updates (from W, U, H, d, b, and words vectors from C) per training step
-        t = model.V*(n-1)*model.m +  model.V*model.h + model.h*(n-1)*model.m + model.h + model.V + model.m*(n-1)
+        t = model.V*(n-1)*model.m + model.V*model.h + model.h*(n-1)*model.m + model.h + model.V + model.m*(n-1)
 
         learning_rate = epsilon_0
         batches_total = 0
@@ -524,10 +524,7 @@ def evaluate(model, evaluation_data, num_batches, validation_flag=1):
                 print('average loss per word so far: {:.3}'.format(loss_total/batches_total/batch_size))
                 print('average perplexity per word so far: {:.3}'.format(np.exp(-perplexity_exponent_total/batches_total/batch_size)))
 
-        if validation_flag:
-            suffix = 'validation'
-        else:
-            suffix = 'test'
+        suffix = 'validation' if validation_flag else 'test'
         if not os.path.exists('results'):
             os.makedirs('results')
         file = open('results/{}.txt'.format(model.name), 'a')
@@ -554,7 +551,7 @@ if __name__ == '__main__':
     # use Brown corpora
     if corpora_option == 'brown':
         corpora_name = 'Brown'
-        data_dict = preprocess_data_brown('corpora/brown.txt')
+        data_dict = preprocess_data_brown()
 
     # use Wiki corpora
     if corpora_option == 'wiki':
