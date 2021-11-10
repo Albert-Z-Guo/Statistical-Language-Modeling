@@ -1,4 +1,4 @@
 msgpack
-tensorflow-gpu==1.15.4
+tensorflow-gpu==2.5.2
 numpy>=1.16.2
 tqdm>=4.31.1
